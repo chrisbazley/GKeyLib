@@ -1,7 +1,7 @@
 # GKeyLib
 (C) 2018 Christopher Bazley
 
-Release 3 (28 Jul 2022)
+Release 4 (19 May 2024)
 
 Introduction
 ------------
@@ -185,6 +185,11 @@ Release 3 (28 Jul 2022)
   compressor.
 - Clarified documentation of typedef GKeyStatus and function
   gkeycomp_compress().
+
+Release 4 (19 May 2024)
+- Added dummy macro definitions to make the tests build without Fortify.
+- Added new makefiles for use on Linux.
+- Improved the README.md file for Linux users.
 
 Contact details
 ---------------
