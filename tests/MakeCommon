@@ -1,0 +1,2 @@
+# Project:   GKeyLibTests
+ObjectList = Main GKeyCompTest GKeyDecompTest RingBufferTest

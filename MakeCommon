@@ -1,0 +1,3 @@
+# Project:   GKeyLib
+LibName = GKey
+ObjectList = GKey GKeyComp GKeyDecomp RingBuffer RingSearch
