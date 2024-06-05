@@ -52,14 +52,14 @@ The type of each chunk is determined by whether its first bit is set:
    position. Otherwise, the next 9 bits give the number of bytes to be copied
    (0-511).
 
-    If the read pointer is before the start of the output buffer then zeros
-  should be written at the output position until it becomes valid again. This
-  is a legitimate method of initialising areas of memory with zeros.
+  If the read pointer is before the start of the output buffer then zeros
+should be written at the output position until it becomes valid again. This
+is a legitimate method of initialising areas of memory with zeros.
 
-    A quirk of 'FDComp' is that least 1 byte is always written. That is
-  probably a bug, although a well-written compressor should not insert
-  directives to copy 0 bytes anyway. Note also that it isn't possible to
-  replicate the whole of the preceding 512 bytes in one operation.
+  A quirk of 'FDComp' is that least 1 byte is always written. That is
+probably a bug, although a well-written compressor should not insert
+directives to copy 0 bytes anyway. Note also that it isn't possible to
+replicate the whole of the preceding 512 bytes in one operation.
 
 Fortified memory allocation
 ---------------------------
