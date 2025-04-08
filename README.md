@@ -1,7 +1,7 @@
 # GKeyLib
 (C) 2018 Christopher Bazley
 
-Release 4 (19 May 2024)
+Release 5 (08 Apr 2025)
 
 Introduction
 ------------
@@ -190,6 +190,9 @@ Release 4 (19 May 2024)
 - Added dummy macro definitions to make the tests build without Fortify.
 - Added new makefiles for use on Linux.
 - Improved the README.md file for Linux users.
+
+Release 5 (08 Apr 2025)
+- Dogfooding the _Optional qualifier.
 
 Contact details
 ---------------

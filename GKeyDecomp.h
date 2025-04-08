@@ -31,12 +31,16 @@ History:
 /* Local headers */
 #include "GKey.h"
 
+#if !defined(USE_OPTIONAL) && !defined(_Optional)
+#define _Optional
+#endif
+
 typedef struct GKeyDecomp GKeyDecomp;
    /*
     * Opaque definition of retained state for a decompressor.
     */
 
-GKeyDecomp *gkeydecomp_make(unsigned int history_log_2);
+_Optional GKeyDecomp *gkeydecomp_make(unsigned int history_log_2);
    /*
     * Creates a decompressor by allocating memory for, and initialising,
     * internal buffers and data structures. The history_log_2 parameter
@@ -46,7 +50,7 @@ GKeyDecomp *gkeydecomp_make(unsigned int history_log_2);
     *          decompressor, otherwise NULL (not enough free memory).
     */
 
-void gkeydecomp_destroy(GKeyDecomp */*decomp*/);
+void gkeydecomp_destroy(_Optional GKeyDecomp */*decomp*/);
    /*
     * Frees memory that was previously allocated for a decompressor.
     * Does nothing if called with a null pointer.

@@ -25,6 +25,7 @@ History:
   CJB: 08-Jan-11: gkeycomp_compress() no longer returns status
                   TruncatedInput (flush is always required anyway).
   CJB: 06-Dec-20: Clarified documentation of gkeycomp_compress().
+  CJB: 08-Apr-25: Dogfooding the _Optional qualifier.
 */
 
 #ifndef GKeyComp_h
@@ -33,12 +34,16 @@ History:
 /* Local headers */
 #include "GKey.h"
 
+#if !defined(USE_OPTIONAL) && !defined(_Optional)
+#define _Optional
+#endif
+
 typedef struct GKeyComp GKeyComp;
    /*
     * Opaque definition of retained state for a compressor.
     */
 
-GKeyComp *gkeycomp_make(unsigned int /*history_log_2*/);
+_Optional GKeyComp *gkeycomp_make(unsigned int /*history_log_2*/);
    /*
     * Creates a compressor by allocating memory for, and initialising,
     * internal buffers and data structures. The history_log_2 parameter
@@ -48,7 +53,7 @@ GKeyComp *gkeycomp_make(unsigned int /*history_log_2*/);
     *          decompressor, otherwise NULL (not enough free memory).
     */
 
-void gkeycomp_destroy(GKeyComp */*comp*/);
+void gkeycomp_destroy(_Optional GKeyComp */*comp*/);
    /*
     * Frees memory that was previously allocated for a compressor.
     * Does nothing if called with a null pointer.

@@ -35,6 +35,7 @@ History:
                   and another to deallocate a buffer. These were needed
                   because it isn't strictly legal to embed a struct with a
                   flexible array member in another struct.
+  CJB: 08-Apr-25: Dogfooding the _Optional qualifier.
 */
 
 #ifndef RingBuffer_h
@@ -43,6 +44,10 @@ History:
 /* ISO library header files */
 #include <stddef.h>
 #include <stdbool.h>
+
+#if !defined(USE_OPTIONAL) && !defined(_Optional)
+#define _Optional
+#endif
 
 typedef struct
 {
@@ -54,9 +59,9 @@ typedef struct
 }
 RingBuffer;
 
-typedef size_t RingBufferWriteFn(void       */*arg*/,
-                                 const void */*s*/,
-                                 size_t      /*n*/);
+typedef size_t RingBufferWriteFn(_Optional void */*arg*/,
+                                 const void     */*s*/,
+                                 size_t          /*n*/);
    /*
     * Type of function called back to report a contiguous address range of data
     * about to be copied within the ring buffer. If it returns a value less
@@ -65,13 +70,13 @@ typedef size_t RingBufferWriteFn(void       */*arg*/,
     * Returns: number of bytes to be copied.
     */
 
-RingBuffer *RingBuffer_make(unsigned int /*size_log_2*/);
+_Optional RingBuffer *RingBuffer_make(unsigned int /*size_log_2*/);
    /*
     * Allocates and initializes a ring buffer of a given size,
     * specified as a power of 2.
     */
 
-void RingBuffer_destroy(RingBuffer */*ring*/);
+void RingBuffer_destroy(_Optional RingBuffer */*ring*/);
    /*
     * Deallocates a specified ring buffer.
     */
@@ -93,11 +98,11 @@ void RingBuffer_write(RingBuffer */*ring*/, const void */*s*/, size_t /*n*/);
     * by the same number of characters.
     */
 
-size_t RingBuffer_copy(RingBuffer        */*ring*/,
-                       RingBufferWriteFn */*write_cb*/,
-                       void              */*cb_arg*/,
-                       size_t             /*offset*/,
-                       size_t             /*n*/);
+size_t RingBuffer_copy(RingBuffer                  */*ring*/,
+                       _Optional RingBufferWriteFn */*write_cb*/,
+                       _Optional void              */*cb_arg*/,
+                       size_t                       /*offset*/,
+                       size_t                       /*n*/);
    /*
     * Copies 'n' characters within the specified ring buffer to its current
     * write position, which is advanced by the same number of characters. The

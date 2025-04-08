@@ -58,7 +58,8 @@ size_t RingBuffer_find_char(const RingBuffer *ring,
                             int               c)
 {
   size_t to_search, abs_read, found;
-  const unsigned char *match, *start;
+  _Optional const unsigned char *match;
+  const unsigned char *start;
   bool search;
 
   assert(ring != NULL);

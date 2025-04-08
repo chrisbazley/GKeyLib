@@ -39,6 +39,7 @@
   CJB: 15-May-16: Fixed a null pointer dereference in gkeycomp_destroy.
   CJB: 21-Jan-18: Made debugging output even less verbose.
   CJB: 29-Nov-20: Fixed position of linefeed in verbose debugging output.
+  CJB: 08-Apr-25: Dogfooding the _Optional qualifier.
 */
 
 /* ISO library header files */
@@ -51,10 +52,10 @@
 #include <stdint.h>
 
 /* Local headers */
-#include "Internal/GKeyMisc.h"
-#include "Internal/RingBuffer.h"
 #include "GKey.h"
 #include "GKeyComp.h"
+#include "Internal/RingBuffer.h"
+#include "Internal/GKeyMisc.h"
 
 /* Undefine this macro to allow the most recently compressed byte to be copied
    unless the start offset is 0 [sequence size would need to be 1 << n, but
@@ -116,7 +117,7 @@ RingWriterParams;
 static bool write_bits(GKeyComp *comp, GKeyParameters *params, unsigned int nbits, unsigned long bits)
 {
   bool success = true;
-  char *out_buffer;
+  _Optional char *out_buffer;
   size_t out_size, out_total;
   unsigned int acc_nbits;
   unsigned long acc;
@@ -205,9 +206,10 @@ static bool write_bits(GKeyComp *comp, GKeyParameters *params, unsigned int nbit
   return success;
 }
 
-static size_t ring_writer(void *arg, const void *src, size_t n)
+static size_t ring_writer(_Optional void *arg, const void *src, size_t n)
 {
-  RingWriterParams *rwp = arg;
+  assert(arg);
+  RingWriterParams *rwp = (void *)arg;
   size_t nout;
   GKeyComp *comp;
   GKeyParameters *params;
@@ -463,23 +465,29 @@ static const char *get_state_str(GKeyCompState state)
 #endif /* DEBUG_OUTPUT */
 }
 
-GKeyComp *gkeycomp_make(unsigned int history_log_2)
+_Optional GKeyComp *gkeycomp_make(unsigned int history_log_2)
 {
   assert(history_log_2 <= MaxHistoryLog2);
-  GKeyComp *comp = malloc(sizeof(*comp));
+  _Optional GKeyComp *comp = malloc(sizeof(*comp));
   if (comp != NULL)
   {
-    memset(comp, 0, offsetof(GKeyComp, history_log_2));
+    memset(&*comp, 0, offsetof(GKeyComp, history_log_2));
     comp->history_log_2 = history_log_2;
-    comp->history = RingBuffer_make(history_log_2);
-    if (comp->history == NULL)
+    _Optional RingBuffer *const history = RingBuffer_make(history_log_2);
+    if (history == NULL)
+    {
       FREE_SAFE(comp);
+    }
+    else
+    {
+      comp->history = &*history;
+    }
   }
 
   return comp;
 }
 
-void gkeycomp_destroy(GKeyComp *comp)
+void gkeycomp_destroy(_Optional GKeyComp *comp)
 {
   if (comp != NULL)
   {
@@ -534,7 +542,7 @@ GKeyStatus gkeycomp_compress(GKeyComp       *comp,
                        comp->in_total, comp->out_total);
 
         /* Do a callback to report progress, if a function was supplied. */
-        if (params->prog_cb != NULL)
+        if (params->prog_cb)
         {
           if (params->prog_cb(params->cb_arg, comp->in_total, comp->out_total))
             state = GKeyCompState_FindSequence;
@@ -629,7 +637,7 @@ GKeyStatus gkeycomp_compress(GKeyComp       *comp,
           /* Copy matching sequence to the write position in the ring
              buffer. */
           copied = RingBuffer_copy(comp->history,
-                                   NULL,
+                                   (RingBufferWriteFn *)NULL,
                                    NULL,
                                    comp->read_offset,
                                    comp->read_size);

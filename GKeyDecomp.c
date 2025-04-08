@@ -32,6 +32,7 @@
                   to cast the matching parameters.
   CJB: 15-May-16: Fixed a null pointer dereference in gkeydecomp_destroy.
   CJB: 21-Jan-18: Made debugging output even less verbose.
+  CJB: 08-Apr-25: Dogfooding the _Optional qualifier.
 */
 
 /* ISO library header files */
@@ -42,10 +43,10 @@
 #include <stdbool.h>
 
 /* Local headers */
-#include "Internal/GKeyMisc.h"
-#include "Internal/RingBuffer.h"
 #include "GKey.h"
 #include "GKeyDecomp.h"
+#include "Internal/RingBuffer.h"
+#include "Internal/GKeyMisc.h"
 
 /* We must be able to read up to MAX(CHAR_BIT, MaxHistoryLog2) + 1 bits from an
    accumulator with at least CHAR_BIT - 1 bits free, because we can only input
@@ -94,10 +95,11 @@ typedef struct
 }
 RingWriterParams;
 
-static size_t ring_writer(void *arg, const void *src, size_t n)
+static size_t ring_writer(_Optional void *arg, const void *src, size_t n)
 {
   GKeyParameters *params;
-  RingWriterParams *rwp = arg;
+  assert(arg);
+  RingWriterParams *rwp = (void *)arg;
 
   assert(rwp != NULL);
   assert(src != NULL || n == 0);
@@ -112,6 +114,7 @@ static size_t ring_writer(void *arg, const void *src, size_t n)
   else
   {
     /* Copy as much of the source data into the output buffer as will fit. */
+    char *const out_buffer = &*params->out_buffer;
     DEBUG_VERBOSEF("GKeyDecomp: %zu bytes free in output buffer\n",
                    params->out_size);
 
@@ -119,13 +122,13 @@ static size_t ring_writer(void *arg, const void *src, size_t n)
       n = params->out_size;
 
     DEBUG_VERBOSEF("GKeyDecomp: copying %zu bytes from %p to %p\n",
-                   n, src, params->out_buffer);
+                   n, src, out_buffer);
 
-    memcpy(params->out_buffer, src, n);
+    memcpy(out_buffer, src, n);
 
     /* Update the output buffer pointer and length to reflect the amount
        of data written to it. */
-    params->out_buffer = (char *)params->out_buffer + n;
+    params->out_buffer = out_buffer + n;
     params->out_size -= n;
   }
 
@@ -235,23 +238,29 @@ static const char *get_state_str(GKeyDecompState state)
 #endif /* DEBUG_OUTPUT */
 }
 
-GKeyDecomp *gkeydecomp_make(unsigned int history_log_2)
+_Optional GKeyDecomp *gkeydecomp_make(unsigned int history_log_2)
 {
   assert(history_log_2 <= MaxHistoryLog2);
-  GKeyDecomp *decomp = malloc(sizeof(*decomp));
+  _Optional GKeyDecomp *decomp = malloc(sizeof(*decomp));
   if (decomp != NULL)
   {
-    memset(decomp, 0, offsetof(GKeyDecomp, history_log_2));
+    memset(&*decomp, 0, offsetof(GKeyDecomp, history_log_2));
     decomp->history_log_2 = history_log_2;
-    decomp->history = RingBuffer_make(history_log_2);
-    if (decomp->history == NULL)
+    _Optional RingBuffer *const history = RingBuffer_make(history_log_2);
+    if (history == NULL)
+    {
       FREE_SAFE(decomp);
+    }
+    else
+    {
+      decomp->history = &*history;
+    }
   }
 
   return decomp;
 }
 
-void gkeydecomp_destroy(GKeyDecomp *decomp)
+void gkeydecomp_destroy(_Optional GKeyDecomp *decomp)
 {
   if (decomp != NULL)
   {
@@ -271,7 +280,7 @@ GKeyStatus gkeydecomp_decompress(GKeyDecomp *decomp, GKeyParameters *params)
 {
   GKeyStatus status = GKeyStatus_OK;
   GKeyDecompState state;
-  GKeyProgressFn *prog_cb;
+  _Optional GKeyProgressFn *prog_cb;
   unsigned long bits;
   unsigned int nbits;
   bool stop = false;
@@ -292,7 +301,7 @@ GKeyStatus gkeydecomp_decompress(GKeyDecomp *decomp, GKeyParameters *params)
         /* Do a callback to report progress, if a function was supplied. */
         DEBUG_VERBOSEF("GKeyDecomp: Reporting progress (%zu in, %zu out)\n",
                        decomp->in_total, decomp->out_total);
-        if (prog_cb != NULL)
+        if (prog_cb)
         {
           if (prog_cb(params->cb_arg, decomp->in_total, decomp->out_total))
             state = GKeyDecompState_GetType;

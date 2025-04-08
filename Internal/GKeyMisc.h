@@ -17,6 +17,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/* History:
+  CJB: 08-Apr-25: Dogfooding the _Optional qualifier.
+*/
+
 #ifndef GKeyMisc_h
 #define GKeyMisc_h
 
@@ -46,6 +50,30 @@
 #endif /* DEBUG_OUTPUT */
 
 #endif /* USE_CBDEBUG */
+
+#ifdef USE_OPTIONAL
+#include <stdlib.h>
+
+#undef NULL
+#define NULL ((_Optional void *)0)
+
+static inline void optional_free(_Optional void *x)
+{
+    free((void *)x);
+}
+#undef free
+#define free(x) optional_free(x)
+
+static inline _Optional void *optional_malloc(size_t n)
+{
+    return malloc(n);
+}
+#undef malloc
+#define malloc(n) optional_malloc(n)
+
+#else
+#define _Optional
+#endif
 
 #define LOWEST(a, b) ((a) < (b) ? (a) : (b))
 

@@ -37,7 +37,7 @@ enum
 static void test1(void)
 {
   /* Make/destroy */
-  GKeyComp *comp[NumberOfCompressors];
+  _Optional GKeyComp *comp[NumberOfCompressors];
 
   for (size_t i = 0; i < ARRAY_SIZE(comp); i++)
   {
@@ -52,7 +52,7 @@ static void test1(void)
 static void test2(void)
 {
   /* Make fail recovery */
-  GKeyComp *comp = NULL;
+  _Optional GKeyComp *comp = NULL;
   unsigned long limit;
 
   for (limit = 0; limit < FortifyAllocationLimit; ++limit)

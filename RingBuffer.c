@@ -36,6 +36,7 @@
                   to cast the matching parameters.
   CJB: 30-May-16: Can now simulate failure of malloc in RingBuffer_make.
   CJB: 21-Jan-18: Made debugging output even less verbose.
+  CJB: 08-Apr-25: Dogfooding the _Optional qualifier.
 */
 
 /* ISO library header files */
@@ -48,17 +49,19 @@
 #include "Internal/RingBuffer.h"
 #include "Internal/GKeyMisc.h"
 
-RingBuffer *RingBuffer_make(unsigned int size_log_2)
+_Optional RingBuffer *RingBuffer_make(unsigned int size_log_2)
 {
-  RingBuffer * const ring = malloc(offsetof(RingBuffer, buffer) +
-                                   (size_t)(1ul << size_log_2));
+  _Optional RingBuffer * const ring = malloc(offsetof(RingBuffer, buffer) +
+                                             (size_t)(1ul << size_log_2));
   if (ring != NULL)
-    RingBuffer_init(ring, size_log_2);
+  {
+    RingBuffer_init(&*ring, size_log_2);
+  }
 
   return ring;
 }
 
-void RingBuffer_destroy(RingBuffer *ring)
+void RingBuffer_destroy(_Optional RingBuffer *ring)
 {
   free(ring);
 }
@@ -122,7 +125,7 @@ void RingBuffer_write(RingBuffer *ring, const void *s, size_t n)
   ring->write_pos = write_pos;
 }
 
-size_t RingBuffer_copy(RingBuffer *ring, RingBufferWriteFn *write_cb, void *cb_arg, size_t offset, size_t n)
+size_t RingBuffer_copy(RingBuffer *ring, _Optional RingBufferWriteFn *write_cb, _Optional void *cb_arg, size_t offset, size_t n)
 {
   size_t copied, to_copy, total;
 
@@ -150,7 +153,7 @@ size_t RingBuffer_copy(RingBuffer *ring, RingBufferWriteFn *write_cb, void *cb_a
 
     /* If a callback function was provided then offer it the address range
        first so it can truncate it if necessary. */
-    if (write_cb != NULL)
+    if (write_cb)
     {
       copied = write_cb(cb_arg, s, to_copy);
       assert(copied <= to_copy);

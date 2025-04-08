@@ -31,8 +31,8 @@
 #include <stddef.h>
 
 /* Local headers */
-#include "Internal/GKeyMisc.h"
 #include "GKey.h"
+#include "Internal/GKeyMisc.h"
 
 unsigned int GKey_get_read_size_bits(unsigned int history_log_2, size_t read_offset)
 {

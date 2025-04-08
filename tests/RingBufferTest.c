@@ -38,7 +38,7 @@ enum
 static void test1(void)
 {
   /* Make/destroy */
-  RingBuffer *rb[NumberOfBuffers];
+  _Optional RingBuffer *rb[NumberOfBuffers];
 
   for (size_t i = 0; i < ARRAY_SIZE(rb); i++)
   {
@@ -53,7 +53,7 @@ static void test1(void)
 static void test2(void)
 {
   /* Make fail recovery */
-  RingBuffer *rb = NULL;
+  _Optional RingBuffer *rb = NULL;
   unsigned long limit;
 
   for (limit = 0; limit < FortifyAllocationLimit; ++limit)
@@ -81,10 +81,13 @@ static void test3(void)
 static void test4(void)
 {
   /* Initialise */
-  RingBuffer *rb = malloc(offsetof(RingBuffer, buffer) + (1u << HistoryLog2));
-  for (size_t i = 0; i < NumberOfBuffers; i++)
+  _Optional RingBuffer *rb = malloc(offsetof(RingBuffer, buffer) + (1u << HistoryLog2));
+  if (rb)
   {
-    RingBuffer_init(rb, HistoryLog2);
+    for (size_t i = 0; i < NumberOfBuffers; i++)
+    {
+      RingBuffer_init(&*rb, HistoryLog2);
+    }
   }
   free(rb);
 }

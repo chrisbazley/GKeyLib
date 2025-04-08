@@ -24,6 +24,7 @@ History:
   CJB: 22-Nov-10: Created this header file.
   CJB: 07-Jan-11: Added the GKey_get_status_str function as a debugging aid.
   CJB: 06-Dec-20: Clarified documentation of GKeyStatus.
+  CJB: 08-Apr-25: Dogfooding the _Optional qualifier.
 */
 
 #ifndef GKey_h
@@ -32,6 +33,10 @@ History:
 /* ISO library headers */
 #include <stddef.h>
 #include <stdbool.h>
+
+#if !defined(USE_OPTIONAL) && !defined(_Optional)
+#define _Optional
+#endif
 
 typedef enum
 {
@@ -68,16 +73,16 @@ typedef struct
                             any data not consumed. */
   size_t     in_size;    /* Size of the input buffer, in bytes. Updated to
                             reflect the no. of bytes not consumed. */
-  void      *out_buffer; /* Pointer to output buffer. If it is null then the
-                            required output buffer size will be calculated.
-                            Otherwise, it is updated to point to any remaining
-                            free space. */
+  _Optional void *out_buffer; /* Pointer to output buffer. If it is null then the
+                                 required output buffer size will be calculated.
+                                 Otherwise, it is updated to point to any remaining
+                                 free space. */
   size_t     out_size;   /* Size of the output buffer, in bytes. If out_buffer
                             is a null pointer then out_size will be incremented
                             by the no. of bytes not written; otherwise,
                             decremented by the no. of bytes written. */
-  GKeyProgressFn *prog_cb; /* A function to be called to indicate progress
-                              during the operation, or a null pointer. */
+  _Optional GKeyProgressFn *prog_cb; /* A function to be called to indicate progress
+                                        during the operation, or a null pointer. */
   void           *cb_arg;  /* Context argument to be passed to the progress
                               callback function. */
 }
