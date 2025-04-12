@@ -24,6 +24,8 @@
   CJB: 18-Apr-15: Assertions are now provided by debug.h.
   CJB: 21-Apr-16: Substituted format specifier %zu for %lu to avoid the need
                   to cast the matching parameters.
+  CJB: 13-Apr-25: Fix warnings when a format specifies type 'void *' but the
+                  argument has type 'char *'.
 */
 
 /* ISO library header files */
@@ -97,14 +99,14 @@ size_t RingBuffer_find_char(const RingBuffer *ring,
     to_search = LOWEST(to_search, n);
 
     DEBUG_VERBOSEF("RingBuffer: searching %p..%p\n",
-                  start, start + to_search - 1);
+                   (void *)start, (void *)(start + to_search - 1));
 
     match = memchr(start, c, to_search);
   }
   else
   {
     DEBUG_VERBOSEF("RingBuffer: %p..%p is known to be zero\n",
-                  start, start + to_search - 1);
+                   (void *)start, (void *)(start + to_search - 1));
     assert(*start == '\0');
     if (c == '\0')
       match = start; /* match at start position */
@@ -128,7 +130,7 @@ size_t RingBuffer_find_char(const RingBuffer *ring,
     to_search = LOWEST(to_search, n);
 
     DEBUG_VERBOSEF("RingBuffer: searching %p..%p\n",
-                  start, start + to_search - 1);
+                   (void *)start, (void *)(start + to_search - 1));
 
     match = memchr(start, c, to_search);
   }
@@ -140,8 +142,8 @@ size_t RingBuffer_find_char(const RingBuffer *ring,
     assert(ring->buffer[(ring->write_pos + found) & (ring->size - 1)] == c);
 
     DEBUG_VERBOSEF("RingBuffer: found match at %p (offset %zu, pos %zu)\n",
-                  match, found,
-                  ring->write_pos + found);
+                   (void *)match, found,
+                   ring->write_pos + found);
   }
   else
   {
@@ -219,8 +221,8 @@ int RingBuffer_compare(const RingBuffer *ring,
 
       /* Compare the two contiguous address ranges */
       DEBUG_VERBOSEF("RingBuffer: comparing %p..%p with %p..%p\n",
-                    start1, start1 + to_compare - 1,
-                    start2, start2 + to_compare - 1);
+                    (void *)start1, (void *)(start1 + to_compare - 1),
+                    (void *)start2, (void *)(start2 + to_compare - 1));
 
       diff = memcmp(start1, start2, to_compare);
       if (diff != 0)

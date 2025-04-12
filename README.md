@@ -1,7 +1,7 @@
 # GKeyLib
 (C) 2018 Christopher Bazley
 
-Release 5 (08 Apr 2025)
+Release 6 (13 Apr 2025)
 
 Introduction
 ------------
@@ -193,6 +193,13 @@ Release 4 (19 May 2024)
 
 Release 5 (08 Apr 2025)
 - Dogfooding the _Optional qualifier.
+
+Release 6 (13 Apr 2025)
+- Fix the object order to fix undefined reference to GKey_get_read_size_bits
+  upon linking with the library.
+- Allow a null context argument to the progress callback.
+- Fix warnings when a format specifies type 'void *' but the
+  argument has type 'char *'.
 
 Contact details
 ---------------

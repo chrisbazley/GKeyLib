@@ -33,6 +33,8 @@
   CJB: 15-May-16: Fixed a null pointer dereference in gkeydecomp_destroy.
   CJB: 21-Jan-18: Made debugging output even less verbose.
   CJB: 08-Apr-25: Dogfooding the _Optional qualifier.
+  CJB: 13-Apr-25: Fix warnings when a format specifies type 'void *' but the
+                  argument has type 'char *'.
 */
 
 /* ISO library header files */
@@ -114,7 +116,7 @@ static size_t ring_writer(_Optional void *arg, const void *src, size_t n)
   else
   {
     /* Copy as much of the source data into the output buffer as will fit. */
-    char *const out_buffer = &*params->out_buffer;
+    void *const out_buffer = &*params->out_buffer;
     DEBUG_VERBOSEF("GKeyDecomp: %zu bytes free in output buffer\n",
                    params->out_size);
 
@@ -128,7 +130,7 @@ static size_t ring_writer(_Optional void *arg, const void *src, size_t n)
 
     /* Update the output buffer pointer and length to reflect the amount
        of data written to it. */
-    params->out_buffer = out_buffer + n;
+    params->out_buffer = (char *)out_buffer + n;
     params->out_size -= n;
   }
 
