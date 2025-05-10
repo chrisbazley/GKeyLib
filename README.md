@@ -1,7 +1,7 @@
 # GKeyLib
 (C) 2018 Christopher Bazley
 
-Release 6 (13 Apr 2025)
+Release 7 (10 May 2025)
 
 Introduction
 ------------
@@ -200,6 +200,10 @@ Release 6 (13 Apr 2025)
 - Allow a null context argument to the progress callback.
 - Fix warnings when a format specifies type 'void *' but the
   argument has type 'char *'.
+
+Release 7 (10 May 2025)
+- Forbid a null context argument to the progress callback.
+- Forbid a null context argument to the ring buffer callback.
 
 Contact details
 ---------------

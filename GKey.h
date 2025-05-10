@@ -26,6 +26,7 @@ History:
   CJB: 06-Dec-20: Clarified documentation of GKeyStatus.
   CJB: 08-Apr-25: Dogfooding the _Optional qualifier.
   CJB: 13-Apr-25: Allow a null context argument to the progress callback.
+  CJB: 10-May-25: Forbid a null context argument to the progress callback.
 */
 
 #ifndef GKey_h
@@ -58,7 +59,7 @@ GKeyStatus;
     * Key's algorithm.
     */
 
-typedef bool GKeyProgressFn(_Optional void *arg, size_t in, size_t out);
+typedef bool GKeyProgressFn(void *arg, size_t in, size_t out);
    /*
     * Type of function called back periodically whilst processing data, to
     * allow the client to display an indication of progress. The values of
@@ -84,7 +85,7 @@ typedef struct
                             decremented by the no. of bytes written. */
   _Optional GKeyProgressFn *prog_cb; /* A function to be called to indicate progress
                                         during the operation, or a null pointer. */
-  _Optional void           *cb_arg;  /* Context argument to be passed to the progress
+  void                     *cb_arg;  /* Context argument to be passed to the progress
                                         callback function. */
 }
 GKeyParameters;

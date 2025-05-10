@@ -37,6 +37,7 @@
   CJB: 30-May-16: Can now simulate failure of malloc in RingBuffer_make.
   CJB: 21-Jan-18: Made debugging output even less verbose.
   CJB: 08-Apr-25: Dogfooding the _Optional qualifier.
+  CJB: 10-May-25: Forbid a null context argument to the ring buffer callback.
 */
 
 /* ISO library header files */
@@ -125,7 +126,7 @@ void RingBuffer_write(RingBuffer *ring, const void *s, size_t n)
   ring->write_pos = write_pos;
 }
 
-size_t RingBuffer_copy(RingBuffer *ring, _Optional RingBufferWriteFn *write_cb, _Optional void *cb_arg, size_t offset, size_t n)
+size_t RingBuffer_copy(RingBuffer *ring, _Optional RingBufferWriteFn *write_cb, void *cb_arg, size_t offset, size_t n)
 {
   size_t copied, to_copy, total;
 

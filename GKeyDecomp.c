@@ -35,6 +35,7 @@
   CJB: 08-Apr-25: Dogfooding the _Optional qualifier.
   CJB: 13-Apr-25: Fix warnings when a format specifies type 'void *' but the
                   argument has type 'char *'.
+  CJB: 10-May-25: Forbid a null context argument to the ring buffer callback.
 */
 
 /* ISO library header files */
@@ -97,11 +98,11 @@ typedef struct
 }
 RingWriterParams;
 
-static size_t ring_writer(_Optional void *arg, const void *src, size_t n)
+static size_t ring_writer(void *arg, const void *src, size_t n)
 {
   GKeyParameters *params;
   assert(arg);
-  RingWriterParams *rwp = (void *)arg;
+  RingWriterParams *rwp = arg;
 
   assert(rwp != NULL);
   assert(src != NULL || n == 0);

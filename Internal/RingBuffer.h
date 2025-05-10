@@ -36,6 +36,7 @@ History:
                   because it isn't strictly legal to embed a struct with a
                   flexible array member in another struct.
   CJB: 08-Apr-25: Dogfooding the _Optional qualifier.
+  CJB: 10-May-25: Forbid a null context argument to the ring buffer callback.
 */
 
 #ifndef RingBuffer_h
@@ -59,7 +60,7 @@ typedef struct
 }
 RingBuffer;
 
-typedef size_t RingBufferWriteFn(_Optional void */*arg*/,
+typedef size_t RingBufferWriteFn(void           */*cb_arg*/,
                                  const void     */*s*/,
                                  size_t          /*n*/);
    /*
@@ -100,7 +101,7 @@ void RingBuffer_write(RingBuffer */*ring*/, const void */*s*/, size_t /*n*/);
 
 size_t RingBuffer_copy(RingBuffer                  */*ring*/,
                        _Optional RingBufferWriteFn */*write_cb*/,
-                       _Optional void              */*cb_arg*/,
+                       void                        */*cb_arg*/,
                        size_t                       /*offset*/,
                        size_t                       /*n*/);
    /*

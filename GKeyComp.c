@@ -40,6 +40,7 @@
   CJB: 21-Jan-18: Made debugging output even less verbose.
   CJB: 29-Nov-20: Fixed position of linefeed in verbose debugging output.
   CJB: 08-Apr-25: Dogfooding the _Optional qualifier.
+  CJB: 10-May-25: Forbid a null context argument to the ring buffer callback.
 */
 
 /* ISO library header files */
@@ -206,10 +207,10 @@ static bool write_bits(GKeyComp *comp, GKeyParameters *params, unsigned int nbit
   return success;
 }
 
-static size_t ring_writer(_Optional void *arg, const void *src, size_t n)
+static size_t ring_writer(void *arg, const void *src, size_t n)
 {
   assert(arg);
-  RingWriterParams *rwp = (void *)arg;
+  RingWriterParams *rwp = arg;
   size_t nout;
   GKeyComp *comp;
   GKeyParameters *params;
@@ -638,7 +639,7 @@ GKeyStatus gkeycomp_compress(GKeyComp       *comp,
              buffer. */
           copied = RingBuffer_copy(comp->history,
                                    (RingBufferWriteFn *)NULL,
-                                   NULL,
+                                   (void *)NULL,
                                    comp->read_offset,
                                    comp->read_size);
           assert(copied <= comp->read_size);
