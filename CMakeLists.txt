@@ -16,7 +16,7 @@ set_target_properties(GKey PROPERTIES
     DEBUG_POSTFIX "dbg"
 )
 
-target_include_directories(GKey PRIVATE .)
+target_include_directories(GKey PUBLIC .)
 target_compile_definitions(GKey PRIVATE $<$<CONFIG:Debug>:DEBUG_OUTPUT>)
 
 install(TARGETS GKey
