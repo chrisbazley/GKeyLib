@@ -36,6 +36,7 @@
   CJB: 13-Apr-25: Fix warnings when a format specifies type 'void *' but the
                   argument has type 'char *'.
   CJB: 10-May-25: Forbid a null context argument to the ring buffer callback.
+  CJB: 29-Apr-26: Stop dereferencing a pointer of type void *. 
 */
 
 /* ISO library header files */
@@ -108,8 +109,9 @@ static size_t ring_writer(void *arg, const void *src, size_t n)
   assert(src != NULL || n == 0);
 
   params = rwp->params;
+  char *const out_buffer = params->out_buffer;
 
-  if (params->out_buffer == NULL)
+  if (out_buffer == NULL)
   {
     /* No output buffer was provided so update the required size. */
     params->out_size += n;
@@ -117,7 +119,6 @@ static size_t ring_writer(void *arg, const void *src, size_t n)
   else
   {
     /* Copy as much of the source data into the output buffer as will fit. */
-    void *const out_buffer = &*params->out_buffer;
     DEBUG_VERBOSEF("GKeyDecomp: %zu bytes free in output buffer\n",
                    params->out_size);
 
@@ -125,13 +126,13 @@ static size_t ring_writer(void *arg, const void *src, size_t n)
       n = params->out_size;
 
     DEBUG_VERBOSEF("GKeyDecomp: copying %zu bytes from %p to %p\n",
-                   n, src, out_buffer);
+                   n, src, (void *)out_buffer);
 
-    memcpy(out_buffer, src, n);
+    memcpy(&*out_buffer, src, n);
 
     /* Update the output buffer pointer and length to reflect the amount
        of data written to it. */
-    params->out_buffer = (char *)out_buffer + n;
+    params->out_buffer = out_buffer + n;
     params->out_size -= n;
   }
 
