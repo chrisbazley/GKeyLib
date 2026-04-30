@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.10)
 project(GKeyLib C)
 
 set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
 
 if(MSVC)
     # MSVC equivalent of -Wall -Wextra is /W4
@@ -24,7 +22,12 @@ set_target_properties(GKey PROPERTIES
 )
 
 target_include_directories(GKey PUBLIC .)
-target_compile_definitions(GKey PRIVATE $<$<CONFIG:Debug>:DEBUG_OUTPUT>)
+
+target_compile_definitions(GKey PRIVATE
+    $<$<CONFIG:Debug>:DEBUG_OUTPUT>
+    $<$<CONFIG:Release>:NDEBUG>
+    $<$<CONFIG:Release>:-O3>
+)
 
 install(TARGETS GKey
     ARCHIVE DESTINATION lib
