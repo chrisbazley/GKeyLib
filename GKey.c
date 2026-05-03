@@ -44,8 +44,7 @@ unsigned int GKey_get_read_size_bits(unsigned int history_log_2, size_t read_off
   if (history_log_2 > 0 && read_offset >= 1u << (history_log_2 - 1))
     history_log_2--;
 
-  DEBUG_VERBOSEF("GKey: read size from offset %zu requires %u bits\n",
-                read_offset, history_log_2);
+  DEBUG_VERBOSEF("GKey: read size from offset %zu requires %u bits\n", read_offset, history_log_2);
 
   return history_log_2;
 }
@@ -53,18 +52,11 @@ unsigned int GKey_get_read_size_bits(unsigned int history_log_2, size_t read_off
 const char *GKey_get_status_str(GKeyStatus status)
 {
 #ifdef DEBUG_OUTPUT
-  static const char *strings[] =
-  {
-    "OK",
-    "BadInput",
-    "TruncatedInput",
-    "BufferOverflow",
-    "Aborted",
-    "Finished"
-  };
+  static const char *strings[] = {"OK",      "BadInput", "TruncatedInput", "BufferOverflow",
+                                  "Aborted", "Finished"};
   assert(status < ARRAY_SIZE(strings));
   return strings[status - GKeyStatus_OK];
-#else /* DEBUG_OUTPUT */
+#else  /* DEBUG_OUTPUT */
   NOT_USED(status);
   return "";
 #endif /* DEBUG_OUTPUT */

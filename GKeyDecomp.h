@@ -36,44 +36,43 @@ History:
 #endif
 
 typedef struct GKeyDecomp GKeyDecomp;
-   /*
-    * Opaque definition of retained state for a decompressor.
-    */
+/*
+ * Opaque definition of retained state for a decompressor.
+ */
 
 _Optional GKeyDecomp *gkeydecomp_make(unsigned int history_log_2);
-   /*
-    * Creates a decompressor by allocating memory for, and initialising,
-    * internal buffers and data structures. The history_log_2 parameter
-    * is the no. of bytes to look behind, in base 2 logarithmic form, and
-    * must be the same as that used to compress the data.
-    * Returns: If successful, a pointer to retained state for the new
-    *          decompressor, otherwise NULL (not enough free memory).
-    */
+/*
+ * Creates a decompressor by allocating memory for, and initialising,
+ * internal buffers and data structures. The history_log_2 parameter
+ * is the no. of bytes to look behind, in base 2 logarithmic form, and
+ * must be the same as that used to compress the data.
+ * Returns: If successful, a pointer to retained state for the new
+ *          decompressor, otherwise NULL (not enough free memory).
+ */
 
-void gkeydecomp_destroy(_Optional GKeyDecomp */*decomp*/);
-   /*
-    * Frees memory that was previously allocated for a decompressor.
-    * Does nothing if called with a null pointer.
-    */
+void gkeydecomp_destroy(_Optional GKeyDecomp * /*decomp*/);
+/*
+ * Frees memory that was previously allocated for a decompressor.
+ * Does nothing if called with a null pointer.
+ */
 
-void gkeydecomp_reset(GKeyDecomp */*decomp*/);
-   /*
-    * Resets a decompressor to a state suitable for decompressing a new
-    * stream of data (as though newly created).
-    */
+void gkeydecomp_reset(GKeyDecomp * /*decomp*/);
+/*
+ * Resets a decompressor to a state suitable for decompressing a new
+ * stream of data (as though newly created).
+ */
 
-GKeyStatus gkeydecomp_decompress(GKeyDecomp     */*decomp*/,
-                                 GKeyParameters */*params*/);
-   /*
-    * Reads data from an input buffer and decompresses it, writing the
-    * results to an output buffer. Can also be used to calculate the required
-    * output buffer size, by providing no output buffer. Both buffers are
-    * specified by the 'params' object. Treats the input as a continuation of
-    * any data already consumed; it should be called iteratively until no
-    * more input is available. If it returns TruncatedInput then the input
-    * data was awkardly truncated (if the end of the bit stream doesn't
-    * coincide with a byte boundary then any excess bits should be 0).
-    * Returns: status of the decompressor (e.g. output buffer overflow).
-    */
+GKeyStatus gkeydecomp_decompress(GKeyDecomp * /*decomp*/, GKeyParameters * /*params*/);
+/*
+ * Reads data from an input buffer and decompresses it, writing the
+ * results to an output buffer. Can also be used to calculate the required
+ * output buffer size, by providing no output buffer. Both buffers are
+ * specified by the 'params' object. Treats the input as a continuation of
+ * any data already consumed; it should be called iteratively until no
+ * more input is available. If it returns TruncatedInput then the input
+ * data was awkardly truncated (if the end of the bit stream doesn't
+ * coincide with a byte boundary then any excess bits should be 0).
+ * Returns: status of the decompressor (e.g. output buffer overflow).
+ */
 
 #endif

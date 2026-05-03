@@ -36,28 +36,28 @@
   CJB: 13-Apr-25: Fix warnings when a format specifies type 'void *' but the
                   argument has type 'char *'.
   CJB: 10-May-25: Forbid a null context argument to the ring buffer callback.
-  CJB: 29-Apr-26: Stop dereferencing a pointer of type void *. 
+  CJB: 29-Apr-26: Stop dereferencing a pointer of type void *.
 */
 
 /* ISO library header files */
+#include <limits.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-#include <limits.h>
-#include <stdbool.h>
 
 /* Local headers */
 #include "GKey.h"
 #include "GKeyDecomp.h"
-#include "Internal/RingBuffer.h"
 #include "Internal/GKeyMisc.h"
+#include "Internal/RingBuffer.h"
 
 /* We must be able to read up to MAX(CHAR_BIT, MaxHistoryLog2) + 1 bits from an
    accumulator with at least CHAR_BIT - 1 bits free, because we can only input
    whole chars. MaxHistoryLog2 = 9 requires an accumulator >= 17 bits wide. */
 enum
 {
-  ULongMinBit    = 32, /* Minimum no. of bits in type 'unsigned long'. */
+  ULongMinBit = 32,                       /* Minimum no. of bits in type 'unsigned long'. */
   MaxHistoryLog2 = ULongMinBit - CHAR_BIT /* Maximum no. of bytes to look
                                              behind, as a base 2 logarithm. */
 };
@@ -72,8 +72,7 @@ typedef enum
   GKeyDecompState_CopyData,
   GKeyDecompState_GetByte,
   GKeyDecompState_PutByte
-}
-GKeyDecompState;
+} GKeyDecompState;
 
 /* This data structure is designed so that zero-initialisation produces a
    valid initial state */
@@ -94,10 +93,9 @@ struct GKeyDecomp
 
 typedef struct
 {
-  GKeyDecomp     *decomp;
+  GKeyDecomp *decomp;
   GKeyParameters *params;
-}
-RingWriterParams;
+} RingWriterParams;
 
 static size_t ring_writer(void *arg, const void *src, size_t n)
 {
@@ -119,14 +117,12 @@ static size_t ring_writer(void *arg, const void *src, size_t n)
   else
   {
     /* Copy as much of the source data into the output buffer as will fit. */
-    DEBUG_VERBOSEF("GKeyDecomp: %zu bytes free in output buffer\n",
-                   params->out_size);
+    DEBUG_VERBOSEF("GKeyDecomp: %zu bytes free in output buffer\n", params->out_size);
 
     if (params->out_size < n)
       n = params->out_size;
 
-    DEBUG_VERBOSEF("GKeyDecomp: copying %zu bytes from %p to %p\n",
-                   n, src, (void *)out_buffer);
+    DEBUG_VERBOSEF("GKeyDecomp: copying %zu bytes from %p to %p\n", n, src, (void *)out_buffer);
 
     memcpy(&*out_buffer, src, n);
 
@@ -141,7 +137,8 @@ static size_t ring_writer(void *arg, const void *src, size_t n)
   return n;
 }
 
-static bool read_bits(GKeyDecomp *decomp, GKeyParameters *params, unsigned int nbits, unsigned long *out)
+static bool read_bits(GKeyDecomp *decomp, GKeyParameters *params, unsigned int nbits,
+                      unsigned long *out)
 {
   bool success = true;
   const unsigned char *in_buffer;
@@ -154,8 +151,8 @@ static bool read_bits(GKeyDecomp *decomp, GKeyParameters *params, unsigned int n
   assert(nbits <= ULongMinBit);
   assert(out != NULL);
 
-  DEBUG_VERBOSEF("GKeyDecomp: Reading %u bits from input buffer %p of size %zu\n",
-                 nbits, params->in_buffer, params->in_size);
+  DEBUG_VERBOSEF("GKeyDecomp: Reading %u bits from input buffer %p of size %zu\n", nbits,
+                 params->in_buffer, params->in_size);
   in_buffer = params->in_buffer;
   in_size = params->in_size;
   acc = decomp->acc;
@@ -177,19 +174,16 @@ static bool read_bits(GKeyDecomp *decomp, GKeyParameters *params, unsigned int n
 
     /* Consume a byte of input */
     byte = *(in_buffer++);
-    DEBUG_VERBOSEF("GKeyDecomp: Read byte %zu (0x%02lx) from input buffer\n",
-                   in_total, byte);
+    DEBUG_VERBOSEF("GKeyDecomp: Read byte %zu (0x%02lx) from input buffer\n", in_total, byte);
     ++in_total;
     --in_size;
 
     /* Insert higher bits in the accumulator */
-    DEBUG_VERBOSEF("GKeyDecomp: Accumulator is 0x%lx (%u bits)\n",
-                  acc, acc_nbits);
+    DEBUG_VERBOSEF("GKeyDecomp: Accumulator is 0x%lx (%u bits)\n", acc, acc_nbits);
     assert(acc_nbits <= ULongMinBit - CHAR_BIT);
     acc |= byte << acc_nbits;
     acc_nbits += CHAR_BIT;
-    DEBUG_VERBOSEF("GKeyDecomp: Accumulator is 0x%lx (%u bits)\n",
-                  acc, acc_nbits);
+    DEBUG_VERBOSEF("GKeyDecomp: Accumulator is 0x%lx (%u bits)\n", acc, acc_nbits);
   }
 
   decomp->in_total = in_total;
@@ -210,8 +204,7 @@ static bool read_bits(GKeyDecomp *decomp, GKeyParameters *params, unsigned int n
     /* Shift down upper bits of accumulator to take their place */
     acc >>= nbits;
     acc_nbits -= nbits;
-    DEBUG_VERBOSEF("GKeyDecomp: Accumulator is now 0x%lx (%u bits)\n",
-                  acc, acc_nbits);
+    DEBUG_VERBOSEF("GKeyDecomp: Accumulator is now 0x%lx (%u bits)\n", acc, acc_nbits);
   }
 
   decomp->acc = acc;
@@ -224,19 +217,11 @@ static bool read_bits(GKeyDecomp *decomp, GKeyParameters *params, unsigned int n
 static const char *get_state_str(GKeyDecompState state)
 {
 #ifdef DEBUG_OUTPUT
-  static const char *strings[] =
-  {
-    "Progress",
-    "GetType",
-    "GetOffset",
-    "GetSize",
-    "CopyData",
-    "GetByte",
-    "PutByte"
-  };
+  static const char *strings[] = {"Progress", "GetType", "GetOffset", "GetSize",
+                                  "CopyData", "GetByte", "PutByte"};
   assert(state - GKeyDecompState_Progress < ARRAY_SIZE(strings));
   return strings[state - GKeyDecompState_Progress];
-#else /* DEBUG_OUTPUT */
+#else  /* DEBUG_OUTPUT */
   NOT_USED(state);
   return "";
 #endif /* DEBUG_OUTPUT */
@@ -303,8 +288,8 @@ GKeyStatus gkeydecomp_decompress(GKeyDecomp *decomp, GKeyParameters *params)
     {
       case GKeyDecompState_Progress:
         /* Do a callback to report progress, if a function was supplied. */
-        DEBUG_VERBOSEF("GKeyDecomp: Reporting progress (%zu in, %zu out)\n",
-                       decomp->in_total, decomp->out_total);
+        DEBUG_VERBOSEF("GKeyDecomp: Reporting progress (%zu in, %zu out)\n", decomp->in_total,
+                       decomp->out_total);
         if (prog_cb)
         {
           if (prog_cb(params->cb_arg, decomp->in_total, decomp->out_total))
@@ -369,8 +354,7 @@ GKeyStatus gkeydecomp_decompress(GKeyDecomp *decomp, GKeyParameters *params)
         DEBUG_VERBOSEF("GKeyDecomp: Getting copy size\n");
         /* If the read offset is within the upper half of the ring buffer then
            the no. of bytes to copy is encoded using fewer bits. */
-        nbits = GKey_get_read_size_bits(decomp->history_log_2,
-                                        decomp->read_offset);
+        nbits = GKey_get_read_size_bits(decomp->history_log_2, decomp->read_offset);
         if (read_bits(decomp, params, nbits, &bits))
         {
           if (bits == 0 || decomp->read_offset + bits > (1ul << decomp->history_log_2))
@@ -400,10 +384,7 @@ GKeyStatus gkeydecomp_decompress(GKeyDecomp *decomp, GKeyParameters *params)
            current output pointer. */
         rwp.params = params;
         rwp.decomp = decomp;
-        copied = RingBuffer_copy(decomp->history,
-                                 ring_writer,
-                                 &rwp,
-                                 decomp->read_offset,
+        copied = RingBuffer_copy(decomp->history, ring_writer, &rwp, decomp->read_offset,
                                  decomp->read_size);
         assert(copied <= decomp->read_size);
         if (copied >= decomp->read_size)
@@ -464,13 +445,11 @@ GKeyStatus gkeydecomp_decompress(GKeyDecomp *decomp, GKeyParameters *params)
         assert("Bad state" == NULL);
         break;
     }
-  }
-  while (status == GKeyStatus_OK && !stop);
+  } while (status == GKeyStatus_OK && !stop);
 
   decomp->state = state;
 
-  DEBUGF("GKeyDecomp: Returning status %s in state %s\n",
-         GKey_get_status_str(status),
+  DEBUGF("GKeyDecomp: Returning status %s in state %s\n", GKey_get_status_str(status),
          get_state_str(state));
 
   return status;

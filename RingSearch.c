@@ -29,15 +29,15 @@
 */
 
 /* ISO library header files */
-#include <stddef.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 
 /* Local headers */
-#include "Internal/RingBuffer.h"
 #include "Internal/GKeyMisc.h"
+#include "Internal/RingBuffer.h"
 
 int RingBuffer_read_char(const RingBuffer *ring, size_t offset)
 {
@@ -49,15 +49,11 @@ int RingBuffer_read_char(const RingBuffer *ring, size_t offset)
   offset = (ring->write_pos + offset) & (ring->size - 1);
   c = ring->buffer[offset];
 
-  DEBUG_VERBOSEF("RingBuffer: read 0x%02x from position %zu\n",
-                c, offset);
+  DEBUG_VERBOSEF("RingBuffer: read 0x%02x from position %zu\n", c, offset);
   return c;
 }
 
-size_t RingBuffer_find_char(const RingBuffer *ring,
-                            size_t            offset,
-                            size_t            n,
-                            int               c)
+size_t RingBuffer_find_char(const RingBuffer *ring, size_t offset, size_t n, int c)
 {
   size_t to_search, abs_read, found;
   _Optional const unsigned char *match;
@@ -65,12 +61,11 @@ size_t RingBuffer_find_char(const RingBuffer *ring,
   bool search;
 
   assert(ring != NULL);
-  assert(offset+n <= ring->size);
+  assert(offset + n <= ring->size);
 
   DEBUG_VERBOSEF("RingBuffer: Searching %zu bytes for 0x%02x from offset %zu \n"
-                "(pos %zu) in ring buffer",
-                n, c, offset,
-                ring->write_pos + offset);
+                 "(pos %zu) in ring buffer",
+                 n, c, offset, ring->write_pos + offset);
 
   /* Calculate absolute read position within the buffer */
   abs_read = (ring->write_pos + offset) & (ring->size - 1);
@@ -98,15 +93,15 @@ size_t RingBuffer_find_char(const RingBuffer *ring,
     /* Ensure we don't exceed the read limit imposed by the caller */
     to_search = LOWEST(to_search, n);
 
-    DEBUG_VERBOSEF("RingBuffer: searching %p..%p\n",
-                   (void *)start, (void *)(start + to_search - 1));
+    DEBUG_VERBOSEF("RingBuffer: searching %p..%p\n", (void *)start,
+                   (void *)(start + to_search - 1));
 
     match = memchr(start, c, to_search);
   }
   else
   {
-    DEBUG_VERBOSEF("RingBuffer: %p..%p is known to be zero\n",
-                   (void *)start, (void *)(start + to_search - 1));
+    DEBUG_VERBOSEF("RingBuffer: %p..%p is known to be zero\n", (void *)start,
+                   (void *)(start + to_search - 1));
     assert(*start == '\0');
     if (c == '\0')
       match = start; /* match at start position */
@@ -129,8 +124,8 @@ size_t RingBuffer_find_char(const RingBuffer *ring,
     /* Ensure we don't exceed the read limit imposed by the caller */
     to_search = LOWEST(to_search, n);
 
-    DEBUG_VERBOSEF("RingBuffer: searching %p..%p\n",
-                   (void *)start, (void *)(start + to_search - 1));
+    DEBUG_VERBOSEF("RingBuffer: searching %p..%p\n", (void *)start,
+                   (void *)(start + to_search - 1));
 
     match = memchr(start, c, to_search);
   }
@@ -141,8 +136,7 @@ size_t RingBuffer_find_char(const RingBuffer *ring,
     assert(found < ring->size);
     assert(ring->buffer[(ring->write_pos + found) & (ring->size - 1)] == c);
 
-    DEBUG_VERBOSEF("RingBuffer: found match at %p (offset %zu, pos %zu)\n",
-                   (void *)match, found,
+    DEBUG_VERBOSEF("RingBuffer: found match at %p (offset %zu, pos %zu)\n", (void *)match, found,
                    ring->write_pos + found);
   }
   else
@@ -153,25 +147,19 @@ size_t RingBuffer_find_char(const RingBuffer *ring,
   return found;
 }
 
-int RingBuffer_compare(const RingBuffer *ring,
-                       size_t            offset1,
-                       size_t            offset2,
-                       size_t            n)
+int RingBuffer_compare(const RingBuffer *ring, size_t offset1, size_t offset2, size_t n)
 {
   size_t len1, len2, abs_read1, abs_read2, to_compare, nleft;
   const unsigned char *start1, *start2;
   int diff = 0;
 
   assert(ring != NULL);
-  assert(offset1+n <= ring->size);
-  assert(offset2+n <= ring->size);
+  assert(offset1 + n <= ring->size);
+  assert(offset2 + n <= ring->size);
 
   DEBUG_VERBOSEF("RingBuffer: Comparing %zu bytes at offset %zu (pos %zu) \n"
-                "with offset %zu (pos %zu) in ring buffer",
-                n, offset1,
-                ring->write_pos + offset1,
-                offset2,
-                ring->write_pos + offset2);
+                 "with offset %zu (pos %zu) in ring buffer",
+                 n, offset1, ring->write_pos + offset1, offset2, ring->write_pos + offset2);
 
   /* Calculate absolute read positions within the buffer */
   abs_read1 = (ring->write_pos + offset1) & (ring->size - 1);
@@ -220,9 +208,9 @@ int RingBuffer_compare(const RingBuffer *ring,
       to_compare = LOWEST(LOWEST(len1, len2), nleft);
 
       /* Compare the two contiguous address ranges */
-      DEBUG_VERBOSEF("RingBuffer: comparing %p..%p with %p..%p\n",
-                    (void *)start1, (void *)(start1 + to_compare - 1),
-                    (void *)start2, (void *)(start2 + to_compare - 1));
+      DEBUG_VERBOSEF("RingBuffer: comparing %p..%p with %p..%p\n", (void *)start1,
+                     (void *)(start1 + to_compare - 1), (void *)start2,
+                     (void *)(start2 + to_compare - 1));
 
       diff = memcmp(start1, start2, to_compare);
       if (diff != 0)
@@ -259,7 +247,8 @@ int RingBuffer_compare(const RingBuffer *ring,
       }
     }
   }
-  DEBUG_VERBOSEF("RingBuffer: Result of comparison is %s\n",
-                diff < 0 ? "less" : diff == 0 ? "equal" : "greater");
+  DEBUG_VERBOSEF("RingBuffer: Result of comparison is %s\n", diff < 0    ? "less"
+                                                             : diff == 0 ? "equal"
+                                                                         : "greater");
   return diff;
 }

@@ -33,8 +33,8 @@ History:
 #define GKey_h
 
 /* ISO library headers */
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #if !defined(USE_OPTIONAL) && !defined(_Optional)
 #define _Optional
@@ -51,67 +51,64 @@ typedef enum
                                 the output produced so far. */
   GKeyStatus_Aborted,        /* Operation aborted by a callback. */
   GKeyStatus_Finished        /* No further input will be accepted. */
-}
-GKeyStatus;
-   /*
-    * GKeyStatus is an enumeration of possible status values which may be
-    * returned by functions which compress or decompress data using Gordon
-    * Key's algorithm.
-    */
+} GKeyStatus;
+/*
+ * GKeyStatus is an enumeration of possible status values which may be
+ * returned by functions which compress or decompress data using Gordon
+ * Key's algorithm.
+ */
 
 typedef bool GKeyProgressFn(void *arg, size_t in, size_t out);
-   /*
-    * Type of function called back periodically whilst processing data, to
-    * allow the client to display an indication of progress. The values of
-    * 'in' and 'out' will be the total number of bytes consumed and output
-    * so far. If this function returns false then the operation will be
-    * aborted; otherwise it will continue until an error occurs or all
-    * input has been consumed.
-    */
+/*
+ * Type of function called back periodically whilst processing data, to
+ * allow the client to display an indication of progress. The values of
+ * 'in' and 'out' will be the total number of bytes consumed and output
+ * so far. If this function returns false then the operation will be
+ * aborted; otherwise it will continue until an error occurs or all
+ * input has been consumed.
+ */
 
 typedef struct
 {
-  const void *in_buffer; /* Pointer to input buffer. Updated to point to
-                            any data not consumed. */
-  size_t     in_size;    /* Size of the input buffer, in bytes. Updated to
-                            reflect the no. of bytes not consumed. */
-  _Optional void *out_buffer; /* Pointer to output buffer. If it is null then the
-                                 required output buffer size will be calculated.
-                                 Otherwise, it is updated to point to any remaining
-                                 free space. */
-  size_t     out_size;   /* Size of the output buffer, in bytes. If out_buffer
-                            is a null pointer then out_size will be incremented
-                            by the no. of bytes not written; otherwise,
-                            decremented by the no. of bytes written. */
+  const void *in_buffer;             /* Pointer to input buffer. Updated to point to
+                                        any data not consumed. */
+  size_t in_size;                    /* Size of the input buffer, in bytes. Updated to
+                                        reflect the no. of bytes not consumed. */
+  _Optional void *out_buffer;        /* Pointer to output buffer. If it is null then the
+                                        required output buffer size will be calculated.
+                                        Otherwise, it is updated to point to any remaining
+                                        free space. */
+  size_t out_size;                   /* Size of the output buffer, in bytes. If out_buffer
+                                        is a null pointer then out_size will be incremented
+                                        by the no. of bytes not written; otherwise,
+                                        decremented by the no. of bytes written. */
   _Optional GKeyProgressFn *prog_cb; /* A function to be called to indicate progress
                                         during the operation, or a null pointer. */
-  void                     *cb_arg;  /* Context argument to be passed to the progress
+  void *cb_arg;                      /* Context argument to be passed to the progress
                                         callback function. */
-}
-GKeyParameters;
-   /*
-    * GKeyParameters is an object that holds input and output parameters
-    * common to functions which compress or decompress data using Gordon
-    * Key's algorithm. It is designed so that the output values for one
-    * call can be used as input values for the next, although intervention
-    * to provide more input data or a new output buffer may be required.
-    */
+} GKeyParameters;
+/*
+ * GKeyParameters is an object that holds input and output parameters
+ * common to functions which compress or decompress data using Gordon
+ * Key's algorithm. It is designed so that the output values for one
+ * call can be used as input values for the next, although intervention
+ * to provide more input data or a new output buffer may be required.
+ */
 
-unsigned int GKey_get_read_size_bits(unsigned int /*history_log_2*/,
-                                     size_t       /*read_offset*/);
-   /*
-    * Gets the number of bits allocated by Gordon Key's compression format to
-    * represent the size of a copy operation starting at 'read_offset' bytes
-    * from a position 'history_log_2' bytes behind the write position.
-    * G.K. allows bytes 255..511 or 257..511 to be copied but not 256..511
-    * (with history_log_2 == 9). This is an authentic quirk.
-    * Returns: no. of bits sufficient for read size.
-    */
+unsigned int GKey_get_read_size_bits(unsigned int /*history_log_2*/, size_t /*read_offset*/);
+/*
+ * Gets the number of bits allocated by Gordon Key's compression format to
+ * represent the size of a copy operation starting at 'read_offset' bytes
+ * from a position 'history_log_2' bytes behind the write position.
+ * G.K. allows bytes 255..511 or 257..511 to be copied but not 256..511
+ * (with history_log_2 == 9). This is an authentic quirk.
+ * Returns: no. of bits sufficient for read size.
+ */
 
 const char *GKey_get_status_str(GKeyStatus status);
-   /*
-    * Gets a string representation of the specified status value.
-    * Returns: pointer to a string, which must not be modified.
-    */
+/*
+ * Gets a string representation of the specified status value.
+ * Returns: pointer to a string, which must not be modified.
+ */
 
 #endif

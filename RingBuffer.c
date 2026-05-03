@@ -41,19 +41,19 @@
 */
 
 /* ISO library header files */
-#include <stddef.h>
-#include <string.h>
-#include <stdlib.h>
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
 
 /* Local headers */
-#include "Internal/RingBuffer.h"
 #include "Internal/GKeyMisc.h"
+#include "Internal/RingBuffer.h"
 
 _Optional RingBuffer *RingBuffer_make(unsigned int size_log_2)
 {
-  _Optional RingBuffer * const ring = malloc(offsetof(RingBuffer, buffer) +
-                                             (size_t)(1ul << size_log_2));
+  _Optional RingBuffer *const ring =
+    malloc(offsetof(RingBuffer, buffer) + (size_t)(1ul << size_log_2));
   if (ring != NULL)
   {
     RingBuffer_init(&*ring, size_log_2);
@@ -62,10 +62,7 @@ _Optional RingBuffer *RingBuffer_make(unsigned int size_log_2)
   return ring;
 }
 
-void RingBuffer_destroy(_Optional RingBuffer *ring)
-{
-  free(ring);
-}
+void RingBuffer_destroy(_Optional RingBuffer *ring) { free(ring); }
 
 void RingBuffer_init(RingBuffer *ring, unsigned int size_log_2)
 {
@@ -102,8 +99,7 @@ void RingBuffer_write(RingBuffer *ring, const void *s, size_t n)
     if (to_copy > nleft)
       to_copy = nleft;
 
-    DEBUG_VERBOSEF("RingBuffer: copying %zu bytes from %p to offset %zu\n",
-                   to_copy, s, write_pos);
+    DEBUG_VERBOSEF("RingBuffer: copying %zu bytes from %p to offset %zu\n", to_copy, s, write_pos);
 
     memmove(ring->buffer + write_pos, s, to_copy);
     s = (const char *)s + to_copy;
@@ -126,7 +122,8 @@ void RingBuffer_write(RingBuffer *ring, const void *s, size_t n)
   ring->write_pos = write_pos;
 }
 
-size_t RingBuffer_copy(RingBuffer *ring, _Optional RingBufferWriteFn *write_cb, void *cb_arg, size_t offset, size_t n)
+size_t RingBuffer_copy(RingBuffer *ring, _Optional RingBufferWriteFn *write_cb, void *cb_arg,
+                       size_t offset, size_t n)
 {
   size_t copied, to_copy, total;
 
@@ -136,8 +133,8 @@ size_t RingBuffer_copy(RingBuffer *ring, _Optional RingBufferWriteFn *write_cb, 
      overwritten before being read. Also, juxtaposition of oldest and
      newest data makes no sense. */
 
-  DEBUG_VERBOSEF("RingBuffer: Copying up to %zu bytes from %zu to %zu in ring buffer\n",
-                 n, ring->write_pos + offset, ring->write_pos);
+  DEBUG_VERBOSEF("RingBuffer: Copying up to %zu bytes from %zu to %zu in ring buffer\n", n,
+                 ring->write_pos + offset, ring->write_pos);
 
   copied = to_copy = 0;
 
@@ -146,7 +143,7 @@ size_t RingBuffer_copy(RingBuffer *ring, _Optional RingBufferWriteFn *write_cb, 
     /* Copy as much of the source data before the end of the ring buffer as
        will fit in the output buffer. */
     const size_t read_pos = (ring->write_pos + offset) & (ring->size - 1);
-    const void * const s = ring->buffer + read_pos;
+    const void *const s = ring->buffer + read_pos;
 
     to_copy = ring->size - read_pos;
     if (to_copy > n - total)

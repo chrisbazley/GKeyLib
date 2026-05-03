@@ -44,24 +44,17 @@
 
 #endif /* USE_CBDEBUG */
 
-
 #ifdef USE_OPTIONAL
 #include <stdlib.h>
 
 #undef NULL
 #define NULL ((_Optional void *)0)
 
-static inline void optional_free(_Optional void *x)
-{
-    free((void *)x);
-}
+static inline void optional_free(_Optional void *x) { free((void *)x); }
 #undef free
 #define free(x) optional_free(x)
 
-static inline _Optional void *optional_malloc(size_t n)
-{
-    return malloc(n);
-}
+static inline _Optional void *optional_malloc(size_t n) { return malloc(n); }
 #undef malloc
 #define malloc(n) optional_malloc(n)
 

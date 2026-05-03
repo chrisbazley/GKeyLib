@@ -82,20 +82,15 @@ void GKeyComp_tests(void)
   {
     const char *test_name;
     void (*test_func)(void);
-  }
-  unit_tests[] =
-  {
-    { "Make/destroy", test1 },
-    { "Make fail recovery", test2 },
-    { "Destroy null", test3 },
+  } unit_tests[] = {
+    {"Make/destroy", test1},
+    {"Make fail recovery", test2},
+    {"Destroy null", test3},
   };
 
-  for (size_t count = 0; count < ARRAY_SIZE(unit_tests); count ++)
+  for (size_t count = 0; count < ARRAY_SIZE(unit_tests); count++)
   {
-    printf("Test %zu/%zu : %s\n",
-           1 + count,
-           ARRAY_SIZE(unit_tests),
-           unit_tests[count].test_name);
+    printf("Test %zu/%zu : %s\n", 1 + count, ARRAY_SIZE(unit_tests), unit_tests[count].test_name);
 
     Fortify_EnterScope();
 
