@@ -20,6 +20,8 @@
 #ifndef Tests_h
 #define Tests_h
 
+#undef NDEBUG
+
 #ifdef FORTIFY
 #include "fortify.h"
 #else
