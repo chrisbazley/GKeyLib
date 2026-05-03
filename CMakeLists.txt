@@ -36,3 +36,9 @@ install(TARGETS GKey
     ARCHIVE DESTINATION lib
     PUBLIC_HEADER DESTINATION include
 )
+
+include(CTest)
+
+if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+  add_subdirectory(tests)
+endif()
