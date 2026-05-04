@@ -62,7 +62,8 @@ void gkeydecomp_reset(GKeyDecomp * /*decomp*/);
  * stream of data (as though newly created).
  */
 
-GKeyStatus gkeydecomp_decompress(GKeyDecomp * /*decomp*/, GKeyParameters * /*params*/);
+GKeyStatus gkeydecomp_decompress(GKeyDecomp * /*decomp*/,
+                                 GKeyParameters * /*params*/);
 /*
  * Reads data from an input buffer and decompresses it, writing the
  * results to an output buffer. Can also be used to calculate the required

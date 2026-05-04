@@ -90,7 +90,8 @@ void GKeyComp_tests(void)
 
   for (size_t count = 0; count < ARRAY_SIZE(unit_tests); count++)
   {
-    printf("Test %zu/%zu : %s\n", 1 + count, ARRAY_SIZE(unit_tests), unit_tests[count].test_name);
+    printf("Test %zu/%zu : %s\n", 1 + count, ARRAY_SIZE(unit_tests),
+           unit_tests[count].test_name);
 
     Fortify_EnterScope();
 

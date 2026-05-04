@@ -81,7 +81,8 @@ static void test3(void)
 static void test4(void)
 {
   /* Initialise */
-  _Optional RingBuffer *rb = malloc(offsetof(RingBuffer, buffer) + (1u << HistoryLog2));
+  _Optional RingBuffer *rb =
+    malloc(offsetof(RingBuffer, buffer) + (1u << HistoryLog2));
   if (rb)
   {
     for (size_t i = 0; i < NumberOfBuffers; i++)
@@ -106,7 +107,8 @@ void RingBuffer_tests(void)
 
   for (size_t count = 0; count < ARRAY_SIZE(unit_tests); count++)
   {
-    printf("Test %zu/%zu : %s\n", 1 + count, ARRAY_SIZE(unit_tests), unit_tests[count].test_name);
+    printf("Test %zu/%zu : %s\n", 1 + count, ARRAY_SIZE(unit_tests),
+           unit_tests[count].test_name);
 
     Fortify_EnterScope();
 

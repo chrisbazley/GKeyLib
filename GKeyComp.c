@@ -70,7 +70,7 @@
    bits wide. */
 enum
 {
-  ULongMinBit = 32,                       /* Minimum no. of bits in type 'unsigned long'. */
+  ULongMinBit = 32, /* Minimum no. of bits in type 'unsigned long'. */
   MaxHistoryLog2 = ULongMinBit - CHAR_BIT /* Maximum no. of bytes to look
                                              behind, as a base 2 logarithm. */
 };
@@ -113,8 +113,8 @@ typedef struct
   GKeyParameters *params;
 } RingWriterParams;
 
-static bool write_bits(GKeyComp *comp, GKeyParameters *params, unsigned int nbits,
-                       unsigned long bits)
+static bool write_bits(GKeyComp *comp, GKeyParameters *params,
+                       unsigned int nbits, unsigned long bits)
 {
   bool success = true;
   _Optional char *out_buffer;
@@ -130,8 +130,9 @@ static bool write_bits(GKeyComp *comp, GKeyParameters *params, unsigned int nbit
     assert(bits < 1ul << nbits);
   }
 
-  DEBUG_VERBOSEF("GKeyComp: Writing %u bits (0x%lx) to output buffer %p of size %zu\n", nbits, bits,
-                 params->out_buffer, params->out_size);
+  DEBUG_VERBOSEF(
+    "GKeyComp: Writing %u bits (0x%lx) to output buffer %p of size %zu\n",
+    nbits, bits, params->out_buffer, params->out_size);
 
   out_buffer = params->out_buffer;
   out_size = params->out_size;
@@ -169,7 +170,8 @@ static bool write_bits(GKeyComp *comp, GKeyParameters *params, unsigned int nbit
     old_acc = acc;
     acc >>= CHAR_BIT;
     acc_nbits -= CHAR_BIT;
-    DEBUG_VERBOSEF("GKeyComp: Accumulator is 0x%lx (%u bits)\n", acc, acc_nbits);
+    DEBUG_VERBOSEF("GKeyComp: Accumulator is 0x%lx (%u bits)\n", acc,
+                   acc_nbits);
 
     if (out_buffer != NULL)
     {
@@ -182,8 +184,8 @@ static bool write_bits(GKeyComp *comp, GKeyParameters *params, unsigned int nbit
       /* No output buffer was provided so calculate required buffer size */
       ++out_size;
     }
-    DEBUG_VERBOSEF("GKeyComp: Wrote byte %zu (0x%02lx) to bitstream\n", out_total,
-                   old_acc & UCHAR_MAX);
+    DEBUG_VERBOSEF("GKeyComp: Wrote byte %zu (0x%02lx) to bitstream\n",
+                   out_total, old_acc & UCHAR_MAX);
     ++out_total;
   }
 
@@ -193,7 +195,8 @@ static bool write_bits(GKeyComp *comp, GKeyParameters *params, unsigned int nbit
     assert(acc_nbits <= ULongMinBit - nbits);
     acc |= bits << acc_nbits;
     acc_nbits += nbits;
-    DEBUG_VERBOSEF("GKeyComp: Accumulator is 0x%lx (%u bits)\n", acc, acc_nbits);
+    DEBUG_VERBOSEF("GKeyComp: Accumulator is 0x%lx (%u bits)\n", acc,
+                   acc_nbits);
   }
 
   params->out_buffer = out_buffer;
@@ -225,7 +228,8 @@ static size_t ring_writer(void *arg, const void *src, size_t n)
   /* Write as many literal byte values to the output buffer as will fit. */
   for (nout = 0; nout < n; ++nout)
   {
-    if (!write_bits(comp, params, CHAR_BIT + 1, (unsigned long)literals[nout] << 1))
+    if (!write_bits(comp, params, CHAR_BIT + 1,
+                    (unsigned long)literals[nout] << 1))
       break;
   }
 
@@ -236,7 +240,8 @@ static size_t ring_writer(void *arg, const void *src, size_t n)
 static bool find_sequence(GKeyComp *comp, GKeyParameters *params)
 {
   bool success;
-  size_t read_offset, read_size, max_read_size, best_read_size, consumed, old_read_offset;
+  size_t read_offset, read_size, max_read_size, best_read_size, consumed,
+    old_read_offset;
   int old_byte, new_byte;
 
   DEBUG_VERBOSEF("GKeyComp: Searching for match in recent history\n");
@@ -267,8 +272,9 @@ static bool find_sequence(GKeyComp *comp, GKeyParameters *params)
          where we stand no chance of improving on the best sequence so far. */
       if (best_read_size >= max_read_size)
       {
-        DEBUG_VERBOSEF("GKeyComp: Can't find sequence longer than %zu to beat %zu\n", max_read_size,
-                       best_read_size);
+        DEBUG_VERBOSEF(
+          "GKeyComp: Can't find sequence longer than %zu to beat %zu\n",
+          max_read_size, best_read_size);
         break;
       }
 
@@ -278,8 +284,8 @@ static bool find_sequence(GKeyComp *comp, GKeyParameters *params)
         const GKeyParameters *const p = params; /* Compiler being silly */
         if (consumed >= p->in_size)
         {
-          DEBUG_VERBOSEF("GKeyComp: Out of input data (consumed %zu of %zu)\n", consumed,
-                         p->in_size);
+          DEBUG_VERBOSEF("GKeyComp: Out of input data (consumed %zu of %zu)\n",
+                         consumed, p->in_size);
           break; /* No more data in input buffer */
         }
 
@@ -294,8 +300,8 @@ static bool find_sequence(GKeyComp *comp, GKeyParameters *params)
       /* First, search for the first character without bothering to update
          the maximum sequence length after every mismatch */
       old_read_offset = read_offset;
-      read_offset =
-        RingBuffer_find_char(comp->history, read_offset, max_read_size - best_read_size, new_byte);
+      read_offset = RingBuffer_find_char(
+        comp->history, read_offset, max_read_size - best_read_size, new_byte);
       assert(read_offset >= old_read_offset);
       if (read_offset == SIZE_MAX)
       {
@@ -306,8 +312,8 @@ static bool find_sequence(GKeyComp *comp, GKeyParameters *params)
 
       if (read_size++ >= best_read_size)
       {
-        DEBUG_VERBOSEF("GKeyComp: Consuming input byte 0x%02x at %zu\n", new_byte,
-                       comp->in_total + consumed);
+        DEBUG_VERBOSEF("GKeyComp: Consuming input byte 0x%02x at %zu\n",
+                       new_byte, comp->in_total + consumed);
         ++consumed; /* consume the byte of input */
       }
 
@@ -319,7 +325,8 @@ static bool find_sequence(GKeyComp *comp, GKeyParameters *params)
         /* Allow the most recently compressed byte to be copied provided that
            sufficient bits are allocated for the sequence size */
         size_t bits_limit;
-        unsigned int nbits = GKey_get_read_size_bits(comp->history_log_2, read_offset);
+        unsigned int nbits =
+          GKey_get_read_size_bits(comp->history_log_2, read_offset);
         bits_limit = (size_t)(1ul << nbits) - 1;
         if (max_read_size > bits_limit)
         {
@@ -328,21 +335,24 @@ static bool find_sequence(GKeyComp *comp, GKeyParameters *params)
           max_read_size = bits_limit;
           if (max_read_size <= best_read_size)
           {
-            DEBUG_VERBOSEF("GKeyComp: Can't extend sequence beyond %zu to beat %zu\n",
-                           max_read_size, best_read_size);
+            DEBUG_VERBOSEF(
+              "GKeyComp: Can't extend sequence beyond %zu to beat %zu\n",
+              max_read_size, best_read_size);
             break;
           }
         }
       }
 #endif /* FOURTH_DIMENSION */
-      DEBUG_VERBOSEF("GKeyComp: Maximum sequence length for offset %zu is %zu\n", read_offset,
-                     max_read_size);
+      DEBUG_VERBOSEF(
+        "GKeyComp: Maximum sequence length for offset %zu is %zu\n",
+        read_offset, max_read_size);
 
       /* Try to match the rest of the previous longest matching sequence */
       if (read_size < best_read_size)
       {
         if (RingBuffer_compare(comp->history, read_offset + read_size,
-                               comp->best_read_offset + read_size, best_read_size - read_size) != 0)
+                               comp->best_read_offset + read_size,
+                               best_read_size - read_size) != 0)
         {
           DEBUG_VERBOSEF("GKeyComp: Mismatch between previous best sequence at "
                          "%zu and new sequence at %zu\n",
@@ -360,7 +370,8 @@ static bool find_sequence(GKeyComp *comp, GKeyParameters *params)
       const GKeyParameters *const p = params; /* Compiler being silly */
       if (consumed >= p->in_size)
       {
-        DEBUG_VERBOSEF("GKeyComp: Out of input data (consumed %zu of %zu)\n", consumed, p->in_size);
+        DEBUG_VERBOSEF("GKeyComp: Out of input data (consumed %zu of %zu)\n",
+                       consumed, p->in_size);
         goto finished; /* No more data in input buffer */
       }
 
@@ -370,8 +381,8 @@ static bool find_sequence(GKeyComp *comp, GKeyParameters *params)
       old_byte = RingBuffer_read_char(comp->history, read_offset + read_size);
       if (new_byte != old_byte)
       {
-        DEBUG_VERBOSEF("GKeyComp: Mismatch at %zu (0x%02x != 0x%02x)\n", read_offset + read_size,
-                       new_byte, old_byte);
+        DEBUG_VERBOSEF("GKeyComp: Mismatch at %zu (0x%02x != 0x%02x)\n",
+                       read_offset + read_size, new_byte, old_byte);
         break;
       }
 
@@ -385,8 +396,9 @@ static bool find_sequence(GKeyComp *comp, GKeyParameters *params)
     if (read_size > best_read_size)
     {
       DEBUG_VERBOSEF("GKeyComp: Replacing best match %zu..%zu with %zu..%zu\n",
-                     comp->best_read_offset, comp->best_read_offset + best_read_size - 1,
-                     read_offset, read_offset + read_size - 1);
+                     comp->best_read_offset,
+                     comp->best_read_offset + best_read_size - 1, read_offset,
+                     read_offset + read_size - 1);
 
       comp->best_read_offset = read_offset;
       best_read_size = read_size;
@@ -420,7 +432,8 @@ finished:
   }
 
   DEBUG_VERBOSEF("GKeyComp: Found sequence %zu..%zu (%s)\n", comp->read_offset,
-                 comp->read_offset + comp->read_size - 1, success ? "final" : "stalled");
+                 comp->read_offset + comp->read_size - 1,
+                 success ? "final" : "stalled");
 
   comp->max_read_size = max_read_size;
   comp->best_read_size = best_read_size;
@@ -431,8 +444,9 @@ finished:
 static const char *get_state_str(GKeyCompState state)
 {
 #ifdef DEBUG_OUTPUT
-  static const char *strings[] = {"NextSequence", "Progress", "FindSequence", "PutOffset",
-                                  "PutSize",      "PutByte",  "PutBytes",     "Flush"};
+  static const char *strings[] = {"NextSequence", "Progress", "FindSequence",
+                                  "PutOffset",    "PutSize",  "PutByte",
+                                  "PutBytes",     "Flush"};
   assert(state - GKeyCompState_NextSequence >= 0);
   assert((size_t)(state - GKeyCompState_NextSequence) < ARRAY_SIZE(strings));
   return strings[state - GKeyCompState_NextSequence];
@@ -514,8 +528,8 @@ GKeyStatus gkeycomp_compress(GKeyComp *comp, GKeyParameters *params)
         /* FALLTHROUGH */
 
       case GKeyCompState_Progress:
-        DEBUG_VERBOSEF("GKeyComp: Reporting progress (%zu in, %zu out)\n", comp->in_total,
-                       comp->out_total);
+        DEBUG_VERBOSEF("GKeyComp: Reporting progress (%zu in, %zu out)\n",
+                       comp->in_total, comp->out_total);
 
         /* Do a callback to report progress, if a function was supplied. */
         if (params->prog_cb)
@@ -565,8 +579,10 @@ GKeyStatus gkeycomp_compress(GKeyComp *comp, GKeyParameters *params)
           {
             /* Put one or more literal values to the output if they would be
                smaller than the equivalent copy command. */
-            nbits = GKey_get_read_size_bits(comp->history_log_2, comp->read_offset);
-            if (comp->read_size * (CHAR_BIT + 1) < comp->history_log_2 + nbits + 1)
+            nbits =
+              GKey_get_read_size_bits(comp->history_log_2, comp->read_offset);
+            if (comp->read_size * (CHAR_BIT + 1) <
+                comp->history_log_2 + nbits + 1)
               state = GKeyCompState_PutBytes;
             else
               state = GKeyCompState_PutOffset;
@@ -604,8 +620,9 @@ GKeyStatus gkeycomp_compress(GKeyComp *comp, GKeyParameters *params)
         {
           /* Copy matching sequence to the write position in the ring
              buffer. */
-          copied = RingBuffer_copy(comp->history, (RingBufferWriteFn *)NULL, (void *)NULL,
-                                   comp->read_offset, comp->read_size);
+          copied =
+            RingBuffer_copy(comp->history, (RingBufferWriteFn *)NULL,
+                            (void *)NULL, comp->read_offset, comp->read_size);
           assert(copied <= comp->read_size);
           state = GKeyCompState_NextSequence;
         }
@@ -620,14 +637,15 @@ GKeyStatus gkeycomp_compress(GKeyComp *comp, GKeyParameters *params)
 
         /* Encode unmatched byte as a literal value */
         in_buffer = params->in_buffer;
-        if (write_bits(comp, params, CHAR_BIT + 1, (unsigned long)*in_buffer << 1))
+        if (write_bits(comp, params, CHAR_BIT + 1,
+                       (unsigned long)*in_buffer << 1))
         {
           /* Write unmatched byte into the ring buffer */
           RingBuffer_write(comp->history, params->in_buffer, 1);
 
           /* Consume the unmatched byte */
-          DEBUG_VERBOSEF("GKeyComp: Consuming input byte 0x%02x at %zu\n", *in_buffer,
-                         comp->in_total);
+          DEBUG_VERBOSEF("GKeyComp: Consuming input byte 0x%02x at %zu\n",
+                         *in_buffer, comp->in_total);
           params->in_buffer = in_buffer + 1;
           --params->in_size;
           ++comp->in_total;
@@ -644,8 +662,8 @@ GKeyStatus gkeycomp_compress(GKeyComp *comp, GKeyParameters *params)
         DEBUG_VERBOSEF("GKeyComp: Putting sequence as literal values\n");
         rwp.comp = comp;
         rwp.params = params;
-        copied =
-          RingBuffer_copy(comp->history, ring_writer, &rwp, comp->read_offset, comp->read_size);
+        copied = RingBuffer_copy(comp->history, ring_writer, &rwp,
+                                 comp->read_offset, comp->read_size);
         assert(copied <= comp->read_size);
         if (copied >= comp->read_size)
         {
@@ -679,8 +697,8 @@ GKeyStatus gkeycomp_compress(GKeyComp *comp, GKeyParameters *params)
 
   comp->state = state;
 
-  DEBUGF("GKeyComp: Returning status %s in state %s\n", GKey_get_status_str(status),
-         get_state_str(state));
+  DEBUGF("GKeyComp: Returning status %s in state %s\n",
+         GKey_get_status_str(status), get_state_str(state));
 
   return status;
 }

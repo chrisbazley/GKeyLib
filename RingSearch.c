@@ -53,7 +53,8 @@ int RingBuffer_read_char(const RingBuffer *ring, size_t offset)
   return c;
 }
 
-size_t RingBuffer_find_char(const RingBuffer *ring, size_t offset, size_t n, int c)
+size_t RingBuffer_find_char(const RingBuffer *ring, size_t offset, size_t n,
+                            int c)
 {
   size_t to_search, abs_read, found;
   _Optional const unsigned char *match;
@@ -136,8 +137,8 @@ size_t RingBuffer_find_char(const RingBuffer *ring, size_t offset, size_t n, int
     assert(found < ring->size);
     assert(ring->buffer[(ring->write_pos + found) & (ring->size - 1)] == c);
 
-    DEBUG_VERBOSEF("RingBuffer: found match at %p (offset %zu, pos %zu)\n", (void *)match, found,
-                   ring->write_pos + found);
+    DEBUG_VERBOSEF("RingBuffer: found match at %p (offset %zu, pos %zu)\n",
+                   (void *)match, found, ring->write_pos + found);
   }
   else
   {
@@ -147,7 +148,8 @@ size_t RingBuffer_find_char(const RingBuffer *ring, size_t offset, size_t n, int
   return found;
 }
 
-int RingBuffer_compare(const RingBuffer *ring, size_t offset1, size_t offset2, size_t n)
+int RingBuffer_compare(const RingBuffer *ring, size_t offset1, size_t offset2,
+                       size_t n)
 {
   size_t len1, len2, abs_read1, abs_read2, to_compare, nleft;
   const unsigned char *start1, *start2;
@@ -159,7 +161,8 @@ int RingBuffer_compare(const RingBuffer *ring, size_t offset1, size_t offset2, s
 
   DEBUG_VERBOSEF("RingBuffer: Comparing %zu bytes at offset %zu (pos %zu) \n"
                  "with offset %zu (pos %zu) in ring buffer",
-                 n, offset1, ring->write_pos + offset1, offset2, ring->write_pos + offset2);
+                 n, offset1, ring->write_pos + offset1, offset2,
+                 ring->write_pos + offset2);
 
   /* Calculate absolute read positions within the buffer */
   abs_read1 = (ring->write_pos + offset1) & (ring->size - 1);
@@ -208,9 +211,9 @@ int RingBuffer_compare(const RingBuffer *ring, size_t offset1, size_t offset2, s
       to_compare = LOWEST(LOWEST(len1, len2), nleft);
 
       /* Compare the two contiguous address ranges */
-      DEBUG_VERBOSEF("RingBuffer: comparing %p..%p with %p..%p\n", (void *)start1,
-                     (void *)(start1 + to_compare - 1), (void *)start2,
-                     (void *)(start2 + to_compare - 1));
+      DEBUG_VERBOSEF("RingBuffer: comparing %p..%p with %p..%p\n",
+                     (void *)start1, (void *)(start1 + to_compare - 1),
+                     (void *)start2, (void *)(start2 + to_compare - 1));
 
       diff = memcmp(start1, start2, to_compare);
       if (diff != 0)
@@ -247,8 +250,9 @@ int RingBuffer_compare(const RingBuffer *ring, size_t offset1, size_t offset2, s
       }
     }
   }
-  DEBUG_VERBOSEF("RingBuffer: Result of comparison is %s\n", diff < 0    ? "less"
-                                                             : diff == 0 ? "equal"
-                                                                         : "greater");
+  DEBUG_VERBOSEF("RingBuffer: Result of comparison is %s\n", diff < 0 ? "less"
+                                                             : diff == 0
+                                                               ? "equal"
+                                                               : "greater");
   return diff;
 }

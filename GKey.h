@@ -70,22 +70,23 @@ typedef bool GKeyProgressFn(void *arg, size_t in, size_t out);
 
 typedef struct
 {
-  const void *in_buffer;             /* Pointer to input buffer. Updated to point to
-                                        any data not consumed. */
-  size_t in_size;                    /* Size of the input buffer, in bytes. Updated to
-                                        reflect the no. of bytes not consumed. */
-  _Optional void *out_buffer;        /* Pointer to output buffer. If it is null then the
-                                        required output buffer size will be calculated.
-                                        Otherwise, it is updated to point to any remaining
-                                        free space. */
-  size_t out_size;                   /* Size of the output buffer, in bytes. If out_buffer
-                                        is a null pointer then out_size will be incremented
-                                        by the no. of bytes not written; otherwise,
-                                        decremented by the no. of bytes written. */
-  _Optional GKeyProgressFn *prog_cb; /* A function to be called to indicate progress
-                                        during the operation, or a null pointer. */
-  void *cb_arg;                      /* Context argument to be passed to the progress
-                                        callback function. */
+  const void *in_buffer;      /* Pointer to input buffer. Updated to point to
+                                 any data not consumed. */
+  size_t in_size;             /* Size of the input buffer, in bytes. Updated to
+                                 reflect the no. of bytes not consumed. */
+  _Optional void *out_buffer; /* Pointer to output buffer. If it is null then
+                                 the required output buffer size will be
+                                 calculated. Otherwise, it is updated to point
+                                 to any remaining free space. */
+  size_t out_size; /* Size of the output buffer, in bytes. If out_buffer
+                      is a null pointer then out_size will be incremented
+                      by the no. of bytes not written; otherwise,
+                      decremented by the no. of bytes written. */
+  _Optional GKeyProgressFn
+    *prog_cb;   /* A function to be called to indicate progress
+                   during the operation, or a null pointer. */
+  void *cb_arg; /* Context argument to be passed to the progress
+                   callback function. */
 } GKeyParameters;
 /*
  * GKeyParameters is an object that holds input and output parameters
@@ -95,7 +96,8 @@ typedef struct
  * to provide more input data or a new output buffer may be required.
  */
 
-unsigned int GKey_get_read_size_bits(unsigned int /*history_log_2*/, size_t /*read_offset*/);
+unsigned int GKey_get_read_size_bits(unsigned int /*history_log_2*/,
+                                     size_t /*read_offset*/);
 /*
  * Gets the number of bits allocated by Gordon Key's compression format to
  * represent the size of a copy operation starting at 'read_offset' bytes

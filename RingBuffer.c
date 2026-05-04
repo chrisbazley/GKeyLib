@@ -99,7 +99,8 @@ void RingBuffer_write(RingBuffer *ring, const void *s, size_t n)
     if (to_copy > nleft)
       to_copy = nleft;
 
-    DEBUG_VERBOSEF("RingBuffer: copying %zu bytes from %p to offset %zu\n", to_copy, s, write_pos);
+    DEBUG_VERBOSEF("RingBuffer: copying %zu bytes from %p to offset %zu\n",
+                   to_copy, s, write_pos);
 
     memmove(ring->buffer + write_pos, s, to_copy);
     s = (const char *)s + to_copy;
@@ -122,8 +123,8 @@ void RingBuffer_write(RingBuffer *ring, const void *s, size_t n)
   ring->write_pos = write_pos;
 }
 
-size_t RingBuffer_copy(RingBuffer *ring, _Optional RingBufferWriteFn *write_cb, void *cb_arg,
-                       size_t offset, size_t n)
+size_t RingBuffer_copy(RingBuffer *ring, _Optional RingBufferWriteFn *write_cb,
+                       void *cb_arg, size_t offset, size_t n)
 {
   size_t copied, to_copy, total;
 
@@ -133,8 +134,9 @@ size_t RingBuffer_copy(RingBuffer *ring, _Optional RingBufferWriteFn *write_cb, 
      overwritten before being read. Also, juxtaposition of oldest and
      newest data makes no sense. */
 
-  DEBUG_VERBOSEF("RingBuffer: Copying up to %zu bytes from %zu to %zu in ring buffer\n", n,
-                 ring->write_pos + offset, ring->write_pos);
+  DEBUG_VERBOSEF(
+    "RingBuffer: Copying up to %zu bytes from %zu to %zu in ring buffer\n", n,
+    ring->write_pos + offset, ring->write_pos);
 
   copied = to_copy = 0;
 
