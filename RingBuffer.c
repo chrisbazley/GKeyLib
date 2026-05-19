@@ -38,6 +38,7 @@
   CJB: 21-Jan-18: Made debugging output even less verbose.
   CJB: 08-Apr-25: Dogfooding the _Optional qualifier.
   CJB: 10-May-25: Forbid a null context argument to the ring buffer callback.
+  CJB: 19-May-26: Don't bother storing size_log_2 because it was unused.
 */
 
 /* ISO library header files */
@@ -67,7 +68,6 @@ void RingBuffer_destroy(_Optional RingBuffer *ring) { free(ring); }
 void RingBuffer_init(RingBuffer *ring, unsigned int size_log_2)
 {
   assert(ring != NULL);
-  ring->size_log_2 = size_log_2;
   ring->size = (size_t)(1ul << size_log_2);
   RingBuffer_reset(ring);
 }
