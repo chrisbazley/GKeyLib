@@ -44,6 +44,7 @@
   CJB: 19-May-26: Don't bother storing acc_nbits and history_log_2 as type
                   char because it provokes narrowing warnings.
                   Assert lossless conversion of size_t to unsigned long.
+                  Shift (size_t)1 instead of casting the result.
 */
 
 /* ISO library header files */
@@ -263,7 +264,7 @@ static bool find_sequence(GKeyComp *comp, GKeyParameters *params)
     {
       /* Calculate the no. of characters to search for the start of a (longer)
          matching sequence */
-      max_read_size = (size_t)(1ul << comp->history_log_2) - read_offset;
+      max_read_size = ((size_t)1 << comp->history_log_2) - read_offset;
 #ifdef FOURTH_DIMENSION
       /* The Fourth Dimension's Comp module never writes directives to copy
          the most recently compressed byte. */
@@ -330,7 +331,7 @@ static bool find_sequence(GKeyComp *comp, GKeyParameters *params)
         size_t bits_limit;
         unsigned int nbits =
           GKey_get_read_size_bits(comp->history_log_2, read_offset);
-        bits_limit = (size_t)(1ul << nbits) - 1;
+        bits_limit = ((size_t)1 << nbits) - 1;
         if (max_read_size > bits_limit)
         {
           /* If the current sequence can't grow longer than the longest
