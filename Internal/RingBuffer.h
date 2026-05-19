@@ -37,6 +37,7 @@ History:
                   flexible array member in another struct.
   CJB: 08-Apr-25: Dogfooding the _Optional qualifier.
   CJB: 10-May-25: Forbid a null context argument to the ring buffer callback.
+  CJB: 19-May-26: Don't bother storing size_log_2 because it was unused.
 */
 
 #ifndef RingBuffer_h
@@ -55,7 +56,6 @@ typedef struct
   size_t size;             /* Size of ring buffer in bytes */
   size_t write_pos;        /* Position in buffer at which to write data */
   bool filled;             /* Has the write position wrapped around yet? */
-  char size_log_2;         /* Size of ring buffer in base 2 logarithmic form */
   unsigned char buffer[];  /* Ring buffer is a variable-length array */
 }
 RingBuffer;
