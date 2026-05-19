@@ -39,6 +39,7 @@
   CJB: 29-Apr-26: Stop dereferencing a pointer of type void *.
   CJB: 19-May-26: Don't bother storing acc_nbits and history_log_2 as type
                   char because it provokes narrowing warnings.
+                  Shift (size_t)1 instead of 1ul to avoid an MSVC warning.
 */
 
 /* ISO library header files */
@@ -368,7 +369,7 @@ GKeyStatus gkeydecomp_decompress(GKeyDecomp *decomp, GKeyParameters *params)
         if (read_bits(decomp, params, nbits, &bits))
         {
           if (bits == 0 ||
-              decomp->read_offset + bits > (1ul << decomp->history_log_2))
+              decomp->read_offset + bits > ((size_t)1 << decomp->history_log_2))
           {
             /* A quirk of the FDComp module is that it treats 0 bits as 1.
                We are less tolerant of bad input. */
