@@ -41,6 +41,8 @@
   CJB: 29-Nov-20: Fixed position of linefeed in verbose debugging output.
   CJB: 08-Apr-25: Dogfooding the _Optional qualifier.
   CJB: 10-May-25: Forbid a null context argument to the ring buffer callback.
+  CJB: 19-May-26: Don't bother storing acc_nbits and history_log_2 as type
+                  char because it provokes narrowing warnings.
 */
 
 /* ISO library header files */
@@ -102,8 +104,8 @@ struct GKeyComp
   size_t read_size;        /* No. of bytes to be copied */
   unsigned long acc;       /* Accumulator for bits waiting to be written to the
                               output buffer */
-  char acc_nbits;          /* No. of bits valid in the accumulator */
-  char history_log_2;      /* Size of ring buffer as a base 2 logarithm */
+  unsigned int acc_nbits;  /* No. of bits valid in the accumulator */
+  unsigned int history_log_2; /* Size of ring buffer as a base 2 logarithm */
   RingBuffer *history;     /* Ring buffer containing recently compressed data */
 };
 
