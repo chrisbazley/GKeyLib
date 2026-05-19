@@ -37,6 +37,8 @@
                   argument has type 'char *'.
   CJB: 10-May-25: Forbid a null context argument to the ring buffer callback.
   CJB: 29-Apr-26: Stop dereferencing a pointer of type void *.
+  CJB: 19-May-26: Don't bother storing acc_nbits and history_log_2 as type
+                  char because it provokes narrowing warnings.
 */
 
 /* ISO library header files */
@@ -85,9 +87,9 @@ struct GKeyDecomp
                             copying data */
   size_t read_size;      /* No. of bytes to be copied */
   unsigned long acc;     /* Accumulator for bits read from the input buffer */
-  char acc_nbits;        /* No. of bits valid in the accumulator */
+  unsigned int acc_nbits; /* No. of bits valid in the accumulator */
   char literal;          /* Byte value to be written at the output position */
-  char history_log_2;    /* Size of ring buffer as a base 2 logarithm */
+  unsigned int history_log_2; /* Size of ring buffer as a base 2 logarithm */
   RingBuffer *history;   /* Ring buffer containing recently decompressed data */
 };
 
