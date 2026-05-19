@@ -25,6 +25,7 @@
   CJB: 18-Apr-15: Assertions are now provided by debug.h.
   CJB: 21-Apr-16: Substituted format specifier %zu for %lu to avoid the need
                   to cast the matching parameter.
+  CJB: 19-May-26: Shift (size_t)1 instead of 1u to stop an MSVC warning.
 */
 
 /* ISO library header files */
@@ -42,7 +43,7 @@ unsigned int GKey_get_read_size_bits(unsigned int history_log_2,
      better coverage than '>=' but doesn't match Gordon Key's compression
      format (which allows bytes 255..511 or 257..511 to be copied but not
      256..511 !) */
-  if (history_log_2 > 0 && read_offset >= 1u << (history_log_2 - 1))
+  if (history_log_2 > 0 && read_offset >= (size_t)1 << (history_log_2 - 1))
     history_log_2--;
 
   DEBUG_VERBOSEF("GKey: read size from offset %zu requires %u bits\n",
