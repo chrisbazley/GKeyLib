@@ -43,6 +43,7 @@
   CJB: 10-May-25: Forbid a null context argument to the ring buffer callback.
   CJB: 19-May-26: Don't bother storing acc_nbits and history_log_2 as type
                   char because it provokes narrowing warnings.
+                  Assert lossless conversion of size_t to unsigned long.
 */
 
 /* ISO library header files */
@@ -505,6 +506,7 @@ GKeyStatus gkeycomp_compress(GKeyComp *comp, GKeyParameters *params)
   RingWriterParams rwp;
   size_t copied;
   unsigned int nbits;
+  unsigned long bits;
 
   assert(comp != NULL);
   assert(params != NULL);
@@ -618,7 +620,9 @@ GKeyStatus gkeycomp_compress(GKeyComp *comp, GKeyParameters *params)
         /* If the read offset is within the upper half of the ring buffer then
            the no. of bytes to copy can be encoded using fewer bits. */
         nbits = GKey_get_read_size_bits(comp->history_log_2, comp->read_offset);
-        if (write_bits(comp, params, nbits, comp->read_size))
+        bits = (unsigned long)comp->read_size;
+        assert(bits == comp->read_size);
+        if (write_bits(comp, params, nbits, bits))
         {
           /* Copy matching sequence to the write position in the ring
              buffer. */
