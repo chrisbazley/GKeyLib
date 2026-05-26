@@ -13,8 +13,9 @@ endif()
 
 file(GLOB SOURCES "*.c")
 file(GLOB PUBLIC_HEADERS "*.h")
+file(GLOB PRIVATE_HEADERS "Internal/*.h")
 
-add_library(GKey STATIC ${SOURCES} ${PUBLIC_HEADERS})
+add_library(GKey STATIC ${SOURCES} ${PUBLIC_HEADERS} ${PRIVATE_HEADERS})
 
 set_target_properties(GKey PROPERTIES
     PUBLIC_HEADER "${PUBLIC_HEADERS}"
