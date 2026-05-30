@@ -26,11 +26,6 @@ target_include_directories(GKey PUBLIC .)
 
 target_compile_definitions(GKey PRIVATE
     $<$<CONFIG:Debug>:DEBUG_OUTPUT>
-    $<$<CONFIG:Release>:NDEBUG>
-)
-
-target_compile_options(GKey PRIVATE
-    $<$<CONFIG:Release>:-O3>
 )
 
 install(TARGETS GKey
