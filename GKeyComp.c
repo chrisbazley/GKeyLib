@@ -45,6 +45,8 @@
                   char because it provokes narrowing warnings.
                   Assert lossless conversion of size_t to unsigned long.
                   Shift (size_t)1 instead of casting the result.
+  CJB: 07-Jun-26: Suppress a static analysis warning about assigning but
+                  ignoring the result of a call to RingBuffer_copy.
 */
 
 /* ISO library header files */
@@ -631,6 +633,7 @@ GKeyStatus gkeycomp_compress(GKeyComp *comp, GKeyParameters *params)
             RingBuffer_copy(comp->history, (RingBufferWriteFn *)NULL,
                             (void *)NULL, comp->read_offset, comp->read_size);
           assert(copied <= comp->read_size);
+          (void)copied;
           state = GKeyCompState_NextSequence;
         }
         else
