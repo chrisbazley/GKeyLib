@@ -81,14 +81,20 @@ ARM Linker:     Fortify_free, referred to from C:debug.GKeyLib(GKeyComp).
 
 Rebuilding the library
 ----------------------
-  You should ensure that the standard C library and CBDebugLib (by the same
-author as GKeyLib) are on your header include path (C$Path if using the
-supplied make files on RISC OS), otherwise the compiler won't be able to find
-the required header files. The dependency on CBDebugLib isn't very strong: it
-can be eliminated by modifying the make file so that the macro USE_CBDEBUG is
-no longer predefined.
 
-  Three make files are supplied:
+  If you have CMake, a build system generator, then you can use it to
+fetch libraries that are dependencies of this library and build the
+libraries and tests with minimal manual intervention.
+
+For example, use the following commands to build and test on Linux:
+```
+  cmake -G 'Unix Makefiles' -S . -B build
+  cd build
+  make
+  ctest
+```
+
+  Three make files are also supplied:
 
 - 'Makefile' is intended for use with GNU Make and the GNU C Compiler on Linux.
 - 'NMakefile' is intended for use with Acorn Make Utility (AMU) and the
@@ -141,6 +147,13 @@ built (e.g. foo.o instead of o.foo).
 files with .c and .h suffixes into subdirectories named 'c' and 'h' and
 remove those suffixes from their names. You probably also need to create
 'o', 'oz', 'd' and 'debug' subdirectories for compiler output.
+
+  You should ensure that the standard C library and CBDebugLib (by the same
+author as GKeyLib) are on your header include path (C$Path if using the
+supplied make files on RISC OS), otherwise the compiler won't be able to find
+the required header files. The dependency on CBDebugLib isn't very strong: it
+can be eliminated by modifying the make file so that the macro USE_CBDEBUG is
+no longer predefined.
 
 Licence and disclaimer
 ----------------------
