@@ -47,6 +47,8 @@
                   Shift (size_t)1 instead of casting the result.
   CJB: 07-Jun-26: Suppress a static analysis warning about assigning but
                   ignoring the result of a call to RingBuffer_copy.
+  CJB: 02-Aug-26: Avoid expression *(out_buffer++) that caused Clang's
+                  _Optional analyzer to emit a spurious diagnostic message.
 */
 
 /* ISO library header files */
@@ -182,7 +184,8 @@ static bool write_bits(GKeyComp *comp, GKeyParameters *params,
     if (out_buffer != NULL)
     {
       /* Output lower bits of accumulator */
-      *(out_buffer++) = (unsigned char)old_acc;
+      *out_buffer = (unsigned char)old_acc;
+      ++out_buffer;
       --out_size;
     }
     else
