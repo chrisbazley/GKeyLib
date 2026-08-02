@@ -40,6 +40,8 @@
   CJB: 19-May-26: Don't bother storing acc_nbits and history_log_2 as type
                   char because it provokes narrowing warnings.
                   Shift (size_t)1 instead of 1ul to avoid an MSVC warning.
+  CJB: 02-Aug-26: Add missing _Optional qualifier to the declaration of
+                  out_buffer in ring_writer.
 */
 
 /* ISO library header files */
@@ -110,7 +112,7 @@ static size_t ring_writer(void *arg, const void *src, size_t n)
   assert(src != NULL || n == 0);
 
   params = rwp->params;
-  char *const out_buffer = params->out_buffer;
+  _Optional char *const out_buffer = params->out_buffer;
 
   if (out_buffer == NULL)
   {
