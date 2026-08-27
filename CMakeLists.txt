@@ -3,6 +3,7 @@ project(GKeyLib C)
 include(FetchContent)
 
 option(USE_OPTIONAL "Enable the _Optional qualifier" OFF)
+option(USE_FORTIFY "Enable Fortify memory-allocation checking" OFF)
 option(ENABLE_CLANG_TIDY "Run clang-tidy during compilation" OFF)
 
 if(USE_OPTIONAL)
@@ -18,6 +19,15 @@ if(USE_OPTIONAL)
         set(CMAKE_XCODE_ATTRIBUTE_CLANG_ANALYZER_OTHER_FLAGS
             "-analyzer-checker optionality,core -analyzer-max-loop 32")
     endif()
+endif()
+
+if(USE_FORTIFY)
+    FetchContent_Declare(Fortify
+        GIT_REPOSITORY https://github.com/chrisbazley/Fortify.git
+        GIT_TAG main
+    )
+
+    FetchContent_MakeAvailable(Fortify)
 endif()
 
 set(CMAKE_C_STANDARD 99)
