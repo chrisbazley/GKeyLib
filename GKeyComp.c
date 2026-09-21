@@ -126,8 +126,6 @@ static bool write_bits(GKeyComp *comp, GKeyParameters *params,
                        unsigned int nbits, unsigned long bits)
 {
   bool success = true;
-  _Optional char *out_buffer;
-  size_t out_size;
 
   assert(comp != NULL);
   assert(params != NULL);
@@ -141,8 +139,8 @@ static bool write_bits(GKeyComp *comp, GKeyParameters *params,
     "GKeyComp: Writing %u bits (0x%lx) to output buffer %p of size %zu\n",
     nbits, bits, params->out_buffer, params->out_size);
 
-  out_buffer = params->out_buffer;
-  out_size = params->out_size;
+  _Optional char *out_buffer = params->out_buffer;
+  size_t out_size = params->out_size;
   size_t out_total = comp->out_total;
 
   unsigned long acc = comp->acc;
