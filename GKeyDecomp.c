@@ -42,6 +42,7 @@
                   Shift (size_t)1 instead of 1ul to avoid an MSVC warning.
   CJB: 02-Aug-26: Add missing _Optional qualifier to the declaration of
                   out_buffer in ring_writer.
+  CJB: 21-Sep-26: Declare variables when they are first assigned.
 */
 
 /* ISO library header files */
@@ -104,14 +105,13 @@ typedef struct
 
 static size_t ring_writer(void *arg, const void *src, size_t n)
 {
-  GKeyParameters *params;
   assert(arg);
   RingWriterParams *rwp = arg;
 
   assert(rwp != NULL);
   assert(src != NULL || n == 0);
 
-  params = rwp->params;
+  GKeyParameters *params = rwp->params;
   _Optional char *const out_buffer = params->out_buffer;
 
   if (out_buffer == NULL)
@@ -149,9 +149,7 @@ static bool read_bits(GKeyDecomp *decomp, GKeyParameters *params,
 {
   bool success = true;
   const unsigned char *in_buffer;
-  size_t in_size, in_total;
-  unsigned int acc_nbits;
-  unsigned long acc;
+  size_t in_size;
 
   assert(decomp != NULL);
   assert(params != NULL);
@@ -163,15 +161,14 @@ static bool read_bits(GKeyDecomp *decomp, GKeyParameters *params,
     params->in_buffer, params->in_size);
   in_buffer = params->in_buffer;
   in_size = params->in_size;
-  acc = decomp->acc;
-  acc_nbits = decomp->acc_nbits;
-  in_total = decomp->in_total;
+  unsigned long acc = decomp->acc;
+  unsigned int acc_nbits = decomp->acc_nbits;
+  size_t in_total = decomp->in_total;
 
   /* While we don't have enough bits in the accumulator and there is more input
      available... */
   while (acc_nbits < nbits)
   {
-    unsigned long byte;
 
     if (in_size == 0)
     {
@@ -181,7 +178,7 @@ static bool read_bits(GKeyDecomp *decomp, GKeyParameters *params,
     }
 
     /* Consume a byte of input */
-    byte = *(in_buffer++);
+    unsigned long byte = *(in_buffer++);
     DEBUG_VERBOSEF("GKeyDecomp: Read byte %zu (0x%02lx) from input buffer\n",
                    in_total, byte);
     ++in_total;
@@ -280,8 +277,6 @@ void gkeydecomp_reset(GKeyDecomp *decomp)
 GKeyStatus gkeydecomp_decompress(GKeyDecomp *decomp, GKeyParameters *params)
 {
   GKeyStatus status = GKeyStatus_OK;
-  GKeyDecompState state;
-  _Optional GKeyProgressFn *prog_cb;
   unsigned long bits;
   unsigned int nbits;
   bool stop = false;
@@ -291,8 +286,8 @@ GKeyStatus gkeydecomp_decompress(GKeyDecomp *decomp, GKeyParameters *params)
   assert(decomp != NULL);
   assert(params != NULL);
 
-  state = decomp->state;
-  prog_cb = params->prog_cb;
+  GKeyDecompState state = decomp->state;
+  _Optional GKeyProgressFn *prog_cb = params->prog_cb;
 
   do
   {

@@ -26,6 +26,7 @@
                   to cast the matching parameters.
   CJB: 13-Apr-25: Fix warnings when a format specifies type 'void *' but the
                   argument has type 'char *'.
+  CJB: 21-Sep-26: Declare variables when they are first assigned.
 */
 
 /* ISO library header files */
@@ -41,13 +42,12 @@
 
 int RingBuffer_read_char(const RingBuffer *ring, size_t offset)
 {
-  int c;
 
   assert(ring != NULL);
   assert(offset < ring->size);
 
   offset = (ring->write_pos + offset) & (ring->size - 1);
-  c = ring->buffer[offset];
+  int c = ring->buffer[offset];
 
   DEBUG_VERBOSEF("RingBuffer: read 0x%02x from position %zu\n", c, offset);
   return c;
@@ -56,9 +56,8 @@ int RingBuffer_read_char(const RingBuffer *ring, size_t offset)
 size_t RingBuffer_find_char(const RingBuffer *ring, size_t offset, size_t n,
                             int c)
 {
-  size_t to_search, abs_read, found;
+  size_t to_search, found;
   _Optional const unsigned char *match;
-  const unsigned char *start;
   bool search;
 
   assert(ring != NULL);
@@ -69,9 +68,9 @@ size_t RingBuffer_find_char(const RingBuffer *ring, size_t offset, size_t n,
                  n, c, offset, ring->write_pos + offset);
 
   /* Calculate absolute read position within the buffer */
-  abs_read = (ring->write_pos + offset) & (ring->size - 1);
+  size_t abs_read = (ring->write_pos + offset) & (ring->size - 1);
 
-  start = ring->buffer + abs_read;
+  const unsigned char *start = ring->buffer + abs_read;
   if (ring->write_pos > abs_read)
   {
     /* Check characters between start position and write position */
@@ -151,8 +150,7 @@ size_t RingBuffer_find_char(const RingBuffer *ring, size_t offset, size_t n,
 int RingBuffer_compare(const RingBuffer *ring, size_t offset1, size_t offset2,
                        size_t n)
 {
-  size_t len1, len2, abs_read1, abs_read2, to_compare, nleft;
-  const unsigned char *start1, *start2;
+  size_t len1, len2, to_compare, nleft;
   int diff = 0;
 
   assert(ring != NULL);
@@ -165,11 +163,11 @@ int RingBuffer_compare(const RingBuffer *ring, size_t offset1, size_t offset2,
                  ring->write_pos + offset2);
 
   /* Calculate absolute read positions within the buffer */
-  abs_read1 = (ring->write_pos + offset1) & (ring->size - 1);
-  abs_read2 = (ring->write_pos + offset2) & (ring->size - 1);
+  size_t abs_read1 = (ring->write_pos + offset1) & (ring->size - 1);
+  size_t abs_read2 = (ring->write_pos + offset2) & (ring->size - 1);
 
-  start1 = ring->buffer + abs_read1;
-  start2 = ring->buffer + abs_read2;
+  const unsigned char *start1 = ring->buffer + abs_read1;
+  const unsigned char *start2 = ring->buffer + abs_read2;
 
   if (n == 1)
   {
