@@ -148,8 +148,6 @@ static bool read_bits(GKeyDecomp *decomp, GKeyParameters *params,
                       unsigned int nbits, unsigned long *out)
 {
   bool success = true;
-  const unsigned char *in_buffer;
-  size_t in_size;
 
   assert(decomp != NULL);
   assert(params != NULL);
@@ -159,8 +157,8 @@ static bool read_bits(GKeyDecomp *decomp, GKeyParameters *params,
   DEBUG_VERBOSEF(
     "GKeyDecomp: Reading %u bits from input buffer %p of size %zu\n", nbits,
     params->in_buffer, params->in_size);
-  in_buffer = params->in_buffer;
-  in_size = params->in_size;
+  const unsigned char *in_buffer = params->in_buffer;
+  size_t in_size = params->in_size;
   unsigned long acc = decomp->acc;
   unsigned int acc_nbits = decomp->acc_nbits;
   size_t in_total = decomp->in_total;
