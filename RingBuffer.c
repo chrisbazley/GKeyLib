@@ -39,6 +39,7 @@
   CJB: 08-Apr-25: Dogfooding the _Optional qualifier.
   CJB: 10-May-25: Forbid a null context argument to the ring buffer callback.
   CJB: 19-May-26: Don't bother storing size_log_2 because it was unused.
+  CJB: 21-Sep-26: Declare variables when they are first assigned.
 */
 
 /* ISO library header files */
@@ -81,13 +82,13 @@ void RingBuffer_reset(RingBuffer *ring)
 
 void RingBuffer_write(RingBuffer *ring, const void *s, size_t n)
 {
-  size_t to_copy, nleft, write_pos, ring_size;
+  size_t to_copy, nleft;
 
   assert(ring != NULL);
   assert(s != NULL || n == 0);
 
-  write_pos = ring->write_pos;
-  ring_size = ring->size;
+  size_t write_pos = ring->write_pos;
+  size_t ring_size = ring->size;
 
   /* While we have copied more bytes to the output buffer than we have copied
      into the ring buffer... */
@@ -126,7 +127,7 @@ void RingBuffer_write(RingBuffer *ring, const void *s, size_t n)
 size_t RingBuffer_copy(RingBuffer *ring, _Optional RingBufferWriteFn *write_cb,
                        void *cb_arg, size_t offset, size_t n)
 {
-  size_t copied, to_copy, total;
+  size_t total;
 
   assert(ring != NULL);
   assert(offset + n <= ring->size);
@@ -138,7 +139,8 @@ size_t RingBuffer_copy(RingBuffer *ring, _Optional RingBufferWriteFn *write_cb,
     "RingBuffer: Copying up to %zu bytes from %zu to %zu in ring buffer\n", n,
     ring->write_pos + offset, ring->write_pos);
 
-  copied = to_copy = 0;
+  size_t to_copy = 0;
+  size_t copied = 0;
 
   for (total = 0; total < n && copied >= to_copy; total += copied)
   {

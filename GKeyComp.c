@@ -49,6 +49,7 @@
                   ignoring the result of a call to RingBuffer_copy.
   CJB: 02-Aug-26: Avoid expression *(out_buffer++) that caused Clang's
                   _Optional analyzer to emit a spurious diagnostic message.
+  CJB: 21-Sep-26: Declare variables when they are first assigned.
 */
 
 /* ISO library header files */
@@ -126,9 +127,7 @@ static bool write_bits(GKeyComp *comp, GKeyParameters *params,
 {
   bool success = true;
   _Optional char *out_buffer;
-  size_t out_size, out_total;
-  unsigned int acc_nbits;
-  unsigned long acc;
+  size_t out_size;
 
   assert(comp != NULL);
   assert(params != NULL);
@@ -144,10 +143,10 @@ static bool write_bits(GKeyComp *comp, GKeyParameters *params,
 
   out_buffer = params->out_buffer;
   out_size = params->out_size;
-  out_total = comp->out_total;
+  size_t out_total = comp->out_total;
 
-  acc = comp->acc;
-  acc_nbits = comp->acc_nbits;
+  unsigned long acc = comp->acc;
+  unsigned int acc_nbits = comp->acc_nbits;
   DEBUG_VERBOSEF("GKeyComp: Accumulator is 0x%lx (%u bits)\n", acc, acc_nbits);
 
   /* Special case to allow remaining bits to be flushed out */
@@ -162,7 +161,6 @@ static bool write_bits(GKeyComp *comp, GKeyParameters *params,
      significant 8 bits to the output buffer. */
   while (acc_nbits >= CHAR_BIT)
   {
-    unsigned long old_acc;
 
     if (out_buffer != NULL && out_size == 0)
     {
@@ -175,7 +173,7 @@ static bool write_bits(GKeyComp *comp, GKeyParameters *params,
 
     /* Shift down upper bits of accumulator to take the place
       of those about to be output */
-    old_acc = acc;
+    unsigned long old_acc = acc;
     acc >>= CHAR_BIT;
     acc_nbits -= CHAR_BIT;
     DEBUG_VERBOSEF("GKeyComp: Accumulator is 0x%lx (%u bits)\n", acc,
@@ -223,16 +221,14 @@ static size_t ring_writer(void *arg, const void *src, size_t n)
   assert(arg);
   RingWriterParams *rwp = arg;
   size_t nout;
-  GKeyComp *comp;
-  GKeyParameters *params;
   const unsigned char *literals = (const unsigned char *)src;
 
   assert(rwp != NULL);
   assert(src != NULL || n == 0);
   DEBUG_VERBOSEF("GKeyComp: copying %zu bytes from %p\n", n, src);
 
-  comp = rwp->comp;
-  params = rwp->params;
+  GKeyComp *comp = rwp->comp;
+  GKeyParameters *params = rwp->params;
 
   /* Write as many literal byte values to the output buffer as will fit. */
   for (nout = 0; nout < n; ++nout)
@@ -333,10 +329,9 @@ static bool find_sequence(GKeyComp *comp, GKeyParameters *params)
       {
         /* Allow the most recently compressed byte to be copied provided that
            sufficient bits are allocated for the sequence size */
-        size_t bits_limit;
         unsigned int nbits =
           GKey_get_read_size_bits(comp->history_log_2, read_offset);
-        bits_limit = ((size_t)1 << nbits) - 1;
+        size_t bits_limit = ((size_t)1 << nbits) - 1;
         if (max_read_size > bits_limit)
         {
           /* If the current sequence can't grow longer than the longest
@@ -506,7 +501,6 @@ void gkeycomp_reset(GKeyComp *comp)
 GKeyStatus gkeycomp_compress(GKeyComp *comp, GKeyParameters *params)
 {
   GKeyStatus status = GKeyStatus_OK;
-  GKeyCompState state;
   bool flush, input = true;
   const unsigned char *in_buffer;
   RingWriterParams rwp;
@@ -517,7 +511,7 @@ GKeyStatus gkeycomp_compress(GKeyComp *comp, GKeyParameters *params)
   assert(comp != NULL);
   assert(params != NULL);
 
-  state = comp->state;
+  GKeyCompState state = comp->state;
 
   /* Treat no input as a special case that force-completes the current
      sequence then flushes any bits lingering in the accumulator. */
