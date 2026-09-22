@@ -20,10 +20,13 @@
 /* History:
   CJB: 08-Apr-25: Dogfooding the _Optional qualifier.
   CJB: 15-Jun-26: Send the debug log to stderr not stdout.
+  CJB: 22-Sep-26: Use common macro definitions from CBUtilLib.
 */
 
 #ifndef GKeyMisc_h
 #define GKeyMisc_h
+
+#include "MacroUtils.h"
 
 #ifdef FORTIFY
 #include "fortify.h"
@@ -57,16 +60,5 @@
 #else
 #define _Optional
 #endif
-
-#define LOWEST(a, b) ((a) < (b) ? (a) : (b))
-
-#define FREE_SAFE(memptr) do { \
-  free(memptr); \
-  (memptr) = NULL; \
-} while (0)
-
-#define NOT_USED(x) ((void)(x))
-
-#define ARRAY_SIZE(array) (sizeof(array) / sizeof((array)[0]))
 
 #endif /* GKeyMisc_h */

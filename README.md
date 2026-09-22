@@ -148,12 +148,12 @@ files with .c and .h suffixes into subdirectories named 'c' and 'h' and
 remove those suffixes from their names. You probably also need to create
 'o', 'oz', 'd' and 'debug' subdirectories for compiler output.
 
-  You should ensure that the standard C library and CBDebugLib (by the same
-author as GKeyLib) are on your header include path (C$Path if using the
-supplied make files on RISC OS), otherwise the compiler won't be able to find
-the required header files. The dependency on CBDebugLib isn't very strong: it
-can be eliminated by modifying the make file so that the macro USE_CBDEBUG is
-no longer predefined.
+  You should ensure that the standard C library, CBUtilLib and CBDebugLib (by
+the same author as GKeyLib) are on your header include path (C$Path if using
+the supplied make files on RISC OS), otherwise the compiler won't be able to
+find the required header files. The dependency on CBDebugLib isn't very strong:
+it can be eliminated by modifying the make file so that the macro USE_CBDEBUG
+is no longer predefined.
 
 Licence and disclaimer
 ----------------------

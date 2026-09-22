@@ -6,6 +6,10 @@ option(USE_OPTIONAL "Enable the _Optional qualifier" OFF)
 option(USE_FORTIFY "Enable Fortify memory-allocation checking" OFF)
 option(ENABLE_CLANG_TIDY "Run clang-tidy during compilation" OFF)
 
+FetchContent_Declare(CBUtil GIT_REPOSITORY https://github.com/chrisbazley/CBUtilLib.git GIT_TAG main)
+
+FetchContent_MakeAvailable(CBUtil)
+
 if(USE_OPTIONAL)
     if(NOT CMAKE_C_COMPILER_ID MATCHES "Clang|AppleClang")
         message(FATAL_ERROR
@@ -78,13 +82,7 @@ set_target_properties(GKey PROPERTIES
     DEBUG_POSTFIX "dbg"
 )
 
-if(USE_OPTIONAL)
-    FetchContent_Declare(CBUtil GIT_REPOSITORY https://github.com/chrisbazley/CBUtilLib.git GIT_TAG main)
-
-    FetchContent_MakeAvailable(CBUtil)
-
-    target_link_libraries(GKey PRIVATE CBUtil)
-endif()
+target_link_libraries(GKey PRIVATE CBUtil)
 
 target_include_directories(GKey PUBLIC .)
 
