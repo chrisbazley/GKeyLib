@@ -21,6 +21,8 @@
   CJB: 08-Apr-25: Dogfooding the _Optional qualifier.
   CJB: 15-Jun-26: Send the debug log to stderr not stdout.
   CJB: 22-Sep-26: Use common macro definitions from CBUtilLib.
+  CJB: 14-Oct-26: Omit debug logging with SDCC, whose Z80 library lacks
+                  stderr and fprintf.
 */
 
 #ifndef GKeyMisc_h
@@ -41,6 +43,12 @@
 #include <stdio.h>
 #include <assert.h>
 
+#ifdef __SDCC
+/* The Z80 library has no stderr or fprintf, even in unused branches. */
+#define DEBUG_VERBOSEF(...) ((void)0)
+#define DEBUGF(...) ((void)0)
+#else
+
 #if defined(DEBUG_VERBOSE_OUTPUT) && defined (DEBUG_OUTPUT)
 #define DEBUG_VERBOSEF(...) if (1) fprintf(stderr, __VA_ARGS__)
 #else
@@ -52,6 +60,8 @@
 #else
 #define DEBUGF(...) if (0) fprintf(stderr, __VA_ARGS__)
 #endif /* DEBUG_OUTPUT */
+
+#endif /* __SDCC */
 
 #endif /* USE_CBDEBUG */
 
