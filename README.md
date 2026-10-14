@@ -94,6 +94,20 @@ For example, use the following commands to build and test on Linux:
   ctest
 ```
 
+  To build for Z80 with SDCC, put SDCC's tools and `ucsim_z80` on `PATH`
+and use the supplied CMake toolchain. Running the tests also requires
+Python 3.8 or later. For example:
+
+```sh
+  cmake -S . -B build-sdcc -DCMAKE_TOOLCHAIN_FILE=cmake/sdcc-z80.cmake -DUSE_OPTIONAL=ON
+  cmake --build build-sdcc
+  ctest --test-dir build-sdcc --output-on-failure
+```
+
+  Use `-DBUILD_TESTING=OFF` to build only the library without the simulator.
+SDCC builds omit debug logging because the Z80 library has no `stderr` or
+`fprintf`.
+
   Three make files are also supplied:
 
 - 'Makefile' is intended for use with GNU Make and the GNU C Compiler on Linux.

@@ -9,12 +9,22 @@ option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 
 FetchContent_Declare(CBUtil GIT_REPOSITORY https://github.com/chrisbazley/CBUtilLib.git GIT_TAG main)
 
-FetchContent_MakeAvailable(CBUtil)
+include(CTest)
+
+if(CMAKE_C_COMPILER_ID STREQUAL "SDCC")
+    # The dependency's own CI covers its tests; this build tests GKeyLib.
+    set(GKEY_BUILD_TESTING "${BUILD_TESTING}")
+    set(BUILD_TESTING OFF)
+    FetchContent_MakeAvailable(CBUtil)
+    set(BUILD_TESTING "${GKEY_BUILD_TESTING}")
+else()
+    FetchContent_MakeAvailable(CBUtil)
+endif()
 
 if(USE_OPTIONAL)
-    if(NOT CMAKE_C_COMPILER_ID MATCHES "Clang|AppleClang")
+    if(NOT CMAKE_C_COMPILER_ID MATCHES "Clang|AppleClang|SDCC")
         message(FATAL_ERROR
-            "USE_OPTIONAL requires Christopher Bazley's Clang fork")
+            "USE_OPTIONAL requires SDCC or Christopher Bazley's Clang fork")
     endif()
 
     add_compile_definitions(USE_OPTIONAL)
@@ -36,13 +46,24 @@ if(USE_FORTIFY)
     link_libraries(Fortify)
 endif()
 
+if(CMAKE_C_COMPILER_ID STREQUAL "SDCC")
+    add_compile_options(--std-c99 --max-allocs-per-node 100
+        "SHELL:--disable-warning 110" "SHELL:--disable-warning 126")
+    if(BUILD_TESTING)
+        # Use the dependency's compact assertions and simulator runtime.
+        add_compile_options("-Wp-include,${cbutil_SOURCE_DIR}/tests/sdcc/compat.h")
+        target_compile_options(CBUtil PRIVATE
+            "-Wp-include,${cbutil_SOURCE_DIR}/tests/sdcc/compat.h")
+    endif()
+endif()
+
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_XCODE_ATTRIBUTE_RUN_CLANG_STATIC_ANALYZER "YES")
 
 if(MSVC)
     # MSVC equivalent of -Wall -Wextra is /W4
     add_compile_options(/W4 /wd4200 /wd4996 /wd4130)
-else()
+elseif(NOT CMAKE_C_COMPILER_ID STREQUAL "SDCC")
     # For GCC and Clang
     add_compile_options(-Wall -Wextra -Wsign-compare -pedantic)
 endif()
@@ -50,6 +71,14 @@ endif()
 if(WARNINGS_AS_ERRORS AND CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
     if(MSVC)
         add_compile_options(/WX)
+    elseif(CMAKE_C_COMPILER_ID STREQUAL "SDCC")
+        add_compile_options(--Werror)
+        if(USE_OPTIONAL)
+            find_package(Python3 3.8 REQUIRED COMPONENTS Interpreter)
+            set(CMAKE_C_COMPILER_LAUNCHER
+                "${Python3_EXECUTABLE}"
+                "${cbutil_SOURCE_DIR}/cmake/sdcc-diagnostics.py")
+        endif()
     else()
         add_compile_options(-Werror)
     endif()
@@ -104,8 +133,6 @@ install(TARGETS GKey
     PUBLIC_HEADER DESTINATION include
 )
 
-include(CTest)
-
-if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+if(BUILD_TESTING AND IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tests")
   add_subdirectory(tests)
 endif()
