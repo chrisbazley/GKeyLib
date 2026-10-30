@@ -8,4 +8,5 @@ void GKey_tests(void)
   GKeyComp_tests();
   GKeyDecomp_tests();
   RingBuffer_tests();
+  GKeyRoundTrip_tests();
 }
