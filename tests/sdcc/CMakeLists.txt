@@ -5,7 +5,7 @@ if(NOT UCSIM_Z80_EXECUTABLE)
 endif()
 
 add_executable(GKeyTests Main.c ../GKeyCompTest.c ../GKeyDecompTest.c
-    ../RingBufferTest.c "${cbutil_SOURCE_DIR}/tests/sdcc/runtime.c")
+    ../RingBufferTest.c ../GKeyRoundTripTest.c ../TestData.c "${cbutil_SOURCE_DIR}/tests/sdcc/runtime.c")
 target_compile_definitions(GKeyTests PRIVATE TEST_FUNCTION=GKey_tests)
 target_link_libraries(GKeyTests PRIVATE GKey CBUtil)
 target_link_options(GKeyTests PRIVATE --data-loc 0xf000)

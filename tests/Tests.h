@@ -54,6 +54,7 @@
 
 extern void GKeyComp_tests(void);
 extern void GKeyDecomp_tests(void);
+extern void GKeyRoundTrip_tests(void);
 extern void RingBuffer_tests(void);
 
 #endif /* Tests_h */

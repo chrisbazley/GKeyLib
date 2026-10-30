@@ -53,6 +53,7 @@ int main(int argc, char *argv[])
     {"GKeyComp", GKeyComp_tests},
     {"GKeyDecomp", GKeyDecomp_tests},
     {"RingBuffer", RingBuffer_tests},
+    {"GKeyRoundTrip", GKeyRoundTrip_tests},
   };
 
   NOT_USED(argc);
