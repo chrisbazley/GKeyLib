@@ -49,7 +49,9 @@ static void test1(void)
   }
 
   for (size_t i = 0; i < ARRAY_SIZE(comp); i++)
+  {
     gkeycomp_destroy(comp[i]);
+  }
 }
 
 static void test2(void)
@@ -65,7 +67,9 @@ static void test2(void)
     Fortify_SetNumAllocationsLimit(ULONG_MAX);
 
     if (comp != NULL)
+    {
       break;
+    }
   }
   assert(limit != FortifyAllocationLimit);
 
@@ -86,10 +90,19 @@ static void check_compress(GKeyComp *comp, const TestData *data,
                            size_t chunk_size)
 {
   unsigned char output[TestDataEncodedCapacity];
-  GKeyParameters p = {data->plain, 0, output, sizeof(output), NULL, output};
+  GKeyParameters p = {
+    .in_buffer = data->plain,
+    .in_size = 0,
+    .out_buffer = output,
+    .out_size = sizeof(output),
+    .prog_cb = NULL,
+    .cb_arg = output,
+  };
   size_t supplied = 0, written = 0, calls = 0;
   GKeyStatus status;
+
   assert(chunk_size > 0);
+
   do
   {
     /* Refill even after overflow: empty input requests a flush. */
@@ -97,7 +110,9 @@ static void check_compress(GKeyComp *comp, const TestData *data,
     {
       p.in_size = data->plain_size - supplied;
       if (p.in_size > chunk_size)
+      {
         p.in_size = chunk_size;
+      }
       supplied += p.in_size;
     }
     const bool flushing = p.in_size == 0;
@@ -107,16 +122,22 @@ static void check_compress(GKeyComp *comp, const TestData *data,
     p.out_buffer = output + written;
     p.out_size = sizeof(output) - written;
     if (p.out_size > chunk_size)
+    {
       p.out_size = chunk_size;
+    }
     const size_t available = p.out_size;
+
     status = gkeycomp_compress(comp, &p);
     written += available - p.out_size;
     assert(p.out_buffer == output + written);
     if (status != GKeyStatus_BufferOverflow)
+    {
       assert(status == (flushing ? GKeyStatus_Finished : GKeyStatus_OK));
+    }
     assert(p.in_size <= supplied);
     assert(p.in_buffer == data->plain + (supplied - p.in_size));
   } while (status != GKeyStatus_Finished);
+
   assert(p.in_size == 0);
   assert(written == data->encoded_size);
   assert(memcmp(output, data->encoded, written) == 0);
@@ -136,10 +157,12 @@ static void test4(void)
   /* Check the assembler against a hand-packed vector: copy(0,3), literal A.
      LSB-first bits give 1 | (3 << 10) | (0x82 << 19). */
   static const TestDirective directives[] = {
-    {TestData_Copy, 0, 3}, {TestData_Literal, 0x41, 0},
+    {.kind = TestData_Copy, .value = 0, .size = 3},
+    {.kind = TestData_Literal, .value = 0x41, .size = 0},
   };
-  static const unsigned char encoded[] = {0x01, 0x0c, 0x10, 0x04};
-  static const unsigned char plain[] = {0, 0, 0, 0x41};
+  static const unsigned char
+    encoded[] = {0x01, 0x0c, 0x10, 0x04},
+    plain[] = {0, 0, 0, 0x41};
   TestData data;
   TestData_build(&data, directives, ARRAY_SIZE(directives));
   assert(data.encoded_size == sizeof(encoded));
@@ -148,7 +171,9 @@ static void test4(void)
   assert(memcmp(data.plain, plain, sizeof(plain)) == 0);
   _Optional GKeyComp *comp = gkeycomp_make(TestDataHistoryLog2);
   assert(comp != NULL);
+
   check_compress(&*comp, &data, TestDataEncodedCapacity);
+
   gkeycomp_destroy(comp);
 }
 
@@ -156,25 +181,34 @@ static void test5(void)
 {
   TestData data;
   TestData_mixed(&data);
+
   _Optional GKeyComp *comp = gkeycomp_make(TestDataHistoryLog2);
   assert(comp != NULL);
+
   check_compress(&*comp, &data, TestDataEncodedCapacity);
+
   gkeycomp_reset(&*comp);
   check_compress(&*comp, &data, 1);
+
   /* Reset must discard the old nonzero history and restore zero history. */
   gkeycomp_reset(&*comp);
   check_compress(&*comp, &data, TestDataEncodedCapacity);
+
   gkeycomp_destroy(comp);
 }
 
 static void test6(void)
 {
-  static const TestDirective unused[] = {{TestData_Literal, 0, 0}};
+  static const TestDirective unused[] = {
+    {.kind = TestData_Literal, .value = 0, .size = 0},
+  };
   TestData data;
   TestData_build(&data, unused, 0);
   _Optional GKeyComp *comp = gkeycomp_make(TestDataHistoryLog2);
   assert(comp != NULL);
+
   check_compress(&*comp, &data, TestDataEncodedCapacity);
+
   gkeycomp_destroy(comp);
 }
 
@@ -182,15 +216,25 @@ static void test7(void)
 {
   TestData data;
   TestData_mixed(&data);
+
   _Optional GKeyComp *comp = gkeycomp_make(TestDataHistoryLog2);
   assert(comp != NULL);
-  GKeyParameters p = {data.plain, data.plain_size, NULL, 7, NULL, &data};
+
+  GKeyParameters p = {
+    .in_buffer = data.plain,
+    .in_size = data.plain_size,
+    .out_buffer = NULL,
+    .out_size = 7,
+    .prog_cb = NULL,
+    .cb_arg = &data,
+  };
   assert(gkeycomp_compress(&*comp, &p) == GKeyStatus_OK);
   assert(p.in_size == 0);
   assert(p.in_buffer == data.plain + data.plain_size);
   assert(gkeycomp_compress(&*comp, &p) == GKeyStatus_Finished);
   assert(p.out_buffer == NULL);
   assert(p.out_size == 7 + data.encoded_size);
+
   gkeycomp_destroy(comp);
 }
 

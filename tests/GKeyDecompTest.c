@@ -48,7 +48,9 @@ static void test1(void)
   }
 
   for (size_t i = 0; i < ARRAY_SIZE(decomp); i++)
+  {
     gkeydecomp_destroy(decomp[i]);
+  }
 }
 
 static void test2(void)
@@ -64,7 +66,9 @@ static void test2(void)
     Fortify_SetNumAllocationsLimit(ULONG_MAX);
 
     if (decomp != NULL)
+    {
       break;
+    }
   }
   assert(limit != FortifyAllocationLimit);
 
@@ -83,14 +87,25 @@ static void check_decompress(GKeyDecomp *decomp, const TestData *data,
                              size_t chunk_size)
 {
   unsigned char output[TestDataCapacity];
-  GKeyParameters p = {data->encoded, 0, output, sizeof(output), NULL, output};
+  GKeyParameters p = {
+    .in_buffer = data->encoded,
+    .in_size = 0,
+    .out_buffer = output,
+    .out_size = sizeof(output),
+    .prog_cb = NULL,
+    .cb_arg = output,
+  };
   size_t supplied = 0, written = 0, calls = 0;
+
   assert(chunk_size > 0);
+
   do
   {
     p.in_size = data->encoded_size - supplied;
     if (p.in_size > chunk_size)
+    {
       p.in_size = chunk_size;
+    }
     supplied += p.in_size;
     GKeyStatus status;
     do
@@ -101,21 +116,31 @@ static void check_decompress(GKeyDecomp *decomp, const TestData *data,
       p.out_buffer = output + written;
       p.out_size = sizeof(output) - written;
       if (p.out_size > chunk_size)
+      {
         p.out_size = chunk_size;
+      }
       const size_t available = p.out_size;
+
       status = gkeydecomp_decompress(decomp, &p);
       written += available - p.out_size;
       assert(p.out_buffer == output + written);
       if (status == GKeyStatus_TruncatedInput)
+      {
         assert(supplied < data->encoded_size);
+      }
       else
+      {
         assert(status == GKeyStatus_OK || status == GKeyStatus_BufferOverflow);
+      }
     } while (status == GKeyStatus_BufferOverflow);
     assert(p.in_size == 0);
     assert(p.in_buffer == data->encoded + supplied);
     if (supplied == data->encoded_size)
+    {
       assert(status == GKeyStatus_OK);
+    }
   } while (supplied < data->encoded_size);
+
   assert(written == data->plain_size);
   assert(memcmp(output, data->plain, written) == 0);
 }
@@ -124,17 +149,25 @@ static void test4(void)
 {
   TestData data;
   TestData_mixed(&data);
+
   _Optional GKeyDecomp *decomp = gkeydecomp_make(TestDataHistoryLog2);
   assert(decomp != NULL);
+
   check_decompress(&*decomp, &data, TestDataCapacity);
+
   gkeydecomp_reset(&*decomp);
   check_decompress(&*decomp, &data, 1);
+
   /* With the old write position, this copy would read nonzero data.
      Reset must restore the initial zero history, not just parser state. */
-  static const TestDirective initial_history[] = {{TestData_Copy, 508, 3}};
+  static const TestDirective initial_history[] = {
+    {.kind = TestData_Copy, .value = 508, .size = 3},
+  };
   TestData_build(&data, initial_history, ARRAY_SIZE(initial_history));
+
   gkeydecomp_reset(&*decomp);
   check_decompress(&*decomp, &data, TestDataCapacity);
+
   gkeydecomp_destroy(decomp);
 }
 
@@ -147,19 +180,52 @@ static void test5(void)
     GKeyStatus status;
     unsigned char bytes[3];
   } cases[] = {
-    {3, GKeyStatus_BadInput, {0x01, 0x00, 0x00}}, /* Zero copy length. */
-    {3, GKeyStatus_BadInput, {0xff, 0xff, 0x03}}, /* offset+size > 512. */
-    {1, GKeyStatus_TruncatedInput, {0x01, 0x00, 0x00}}, /* Partial offset. */
-    {2, GKeyStatus_TruncatedInput, {0x01, 0x00, 0x00}}, /* Partial length. */
-    {1, GKeyStatus_TruncatedInput, {0x02, 0x00, 0x00}}, /* Partial literal. */
+    /* Zero copy length. */
+    {
+      .size = 3,
+      .status = GKeyStatus_BadInput,
+      .bytes = {0x01, 0x00, 0x00},
+    },
+    /* offset+size > 512. */
+    {
+      .size = 3,
+      .status = GKeyStatus_BadInput,
+      .bytes = {0xff, 0xff, 0x03},
+    },
+    /* Partial offset. */
+    {
+      .size = 1,
+      .status = GKeyStatus_TruncatedInput,
+      .bytes = {0x01, 0x00, 0x00},
+    },
+    /* Partial length. */
+    {
+      .size = 2,
+      .status = GKeyStatus_TruncatedInput,
+      .bytes = {0x01, 0x00, 0x00},
+    },
+    /* Partial literal. */
+    {
+      .size = 1,
+      .status = GKeyStatus_TruncatedInput,
+      .bytes = {0x02, 0x00, 0x00},
+    },
   };
   _Optional GKeyDecomp *decomp = gkeydecomp_make(TestDataHistoryLog2);
   assert(decomp != NULL);
+
   for (size_t i = 0; i < ARRAY_SIZE(cases); ++i)
   {
     unsigned char output = 0xa5;
-    GKeyParameters p = {cases[i].bytes, cases[i].size,
-                        &output, 1, NULL, &output};
+    GKeyParameters p = {
+      .in_buffer = cases[i].bytes,
+      .in_size = cases[i].size,
+      .out_buffer = &output,
+      .out_size = 1,
+      .prog_cb = NULL,
+      .cb_arg = &output,
+    };
+
     gkeydecomp_reset(&*decomp);
     assert(gkeydecomp_decompress(&*decomp, &p) == cases[i].status);
     assert(p.in_size == 0);
@@ -168,17 +234,22 @@ static void test5(void)
     assert(p.out_buffer == &output);
     assert(output == 0xa5);
   }
+
   gkeydecomp_destroy(decomp);
 }
 
 static void test6(void)
 {
-  static const TestDirective unused[] = {{TestData_Literal, 0, 0}};
+  static const TestDirective unused[] = {
+    {.kind = TestData_Literal, .value = 0, .size = 0},
+  };
   TestData data;
   TestData_build(&data, unused, 0);
   _Optional GKeyDecomp *decomp = gkeydecomp_make(TestDataHistoryLog2);
   assert(decomp != NULL);
+
   check_decompress(&*decomp, &data, TestDataCapacity);
+
   gkeydecomp_destroy(decomp);
 }
 
@@ -186,14 +257,24 @@ static void test7(void)
 {
   TestData data;
   TestData_mixed(&data);
+
   _Optional GKeyDecomp *decomp = gkeydecomp_make(TestDataHistoryLog2);
   assert(decomp != NULL);
-  GKeyParameters p = {data.encoded, data.encoded_size, NULL, 7, NULL, &data};
+
+  GKeyParameters p = {
+    .in_buffer = data.encoded,
+    .in_size = data.encoded_size,
+    .out_buffer = NULL,
+    .out_size = 7,
+    .prog_cb = NULL,
+    .cb_arg = &data,
+  };
   assert(gkeydecomp_decompress(&*decomp, &p) == GKeyStatus_OK);
   assert(p.in_size == 0);
   assert(p.in_buffer == data.encoded + data.encoded_size);
   assert(p.out_buffer == NULL);
   assert(p.out_size == 7 + data.plain_size);
+
   gkeydecomp_destroy(decomp);
 }
 

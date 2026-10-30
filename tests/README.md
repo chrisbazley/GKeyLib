@@ -11,8 +11,10 @@ plain bytes and the packed stream specified by those directives. For example:
 
 ```c
 static const TestDirective directives[] = {
-  {TestData_Copy, 0, 3},       /* Three bytes from initial zero history. */
-  {TestData_Literal, 0x41, 0}, /* A literal 'A'. */
+  /* Three bytes from initial zero history. */
+  {.kind = TestData_Copy, .value = 0, .size = 3},
+  /* A literal 'A'. */
+  {.kind = TestData_Literal, .value = 0x41, .size = 0},
 };
 ```
 
@@ -44,3 +46,14 @@ includes the helper for the legacy makefiles.
 The codec output helpers take a numeric chunk size to run the same buffer
 refill/resumption logic with full buffers or individual bytes. Size-calculation
 tests are separate short functions: they need no output buffers or refill loop.
+
+`RingBufferTest.c` also checks writes and reads across wraparound, reset to zero
+history, copying across the physical boundary, callback refusal/truncation and
+resumption, bounded character searches, and comparisons of wrapped ranges.
+
+Round-trip input and output buffers are static arrays. Each output array is
+filled with a known marker before each case; the input is initially zero and
+fully assigned before each nonempty case. Only the compressed prefix reported
+as written is decoded, and only the expected decoded length is compared after
+checking the reported output length. SDCC places static data at 0xc000, below
+the simulator interface and heap; its runner verifies code/data separation.
