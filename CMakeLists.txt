@@ -136,6 +136,8 @@ install(TARGETS GKey
     PUBLIC_HEADER DESTINATION include
 )
 
-if(BUILD_TESTING AND IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+# Dependency builds use the library without building its test suite.
+if(BUILD_TESTING AND CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR
+   AND IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tests")
   add_subdirectory(tests)
 endif()
