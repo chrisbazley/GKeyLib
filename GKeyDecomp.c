@@ -68,16 +68,37 @@ enum
                                              behind, as a base 2 logarithm. */
 };
 
-/* All possible states of a decompressor. The initial state must be zero. */
+/* Decompressor state transitions (GKeyDecompState_ prefix omitted).
+ * Each state is drawn once. Creation and reset enter Progress, which must
+ * be zero. Unchanged states when a call stops are omitted. A clean end of
+ * input leaves the decompressor at GetType or GetByte; there is no separate
+ * finished state.
+ *
+ *             (start/reset)
+ *                   v
+ *   +--------->[Progress]<----------------------------+
+ *   |               |                                 |
+ *   |               v                                 |
+ *   |           [GetType]-------------+               |
+ *   |               |                 |               |
+ *   |               v                 v               |
+ *   |          [GetOffset]        [GetByte]           |
+ *   |               |                 |               |
+ *   |               v                 v               |
+ *   |           [GetSize]         [PutByte]-----------+
+ *   |               |
+ *   |               v
+ *   +----------[CopyData]
+ */
 typedef enum
 {
-  GKeyDecompState_Progress,
-  GKeyDecompState_GetType,
-  GKeyDecompState_GetOffset,
-  GKeyDecompState_GetSize,
-  GKeyDecompState_CopyData,
-  GKeyDecompState_GetByte,
-  GKeyDecompState_PutByte
+  GKeyDecompState_Progress, /* initially, or from CopyData or PutByte */
+  GKeyDecompState_GetType, /* from Progress */
+  GKeyDecompState_GetOffset, /* from GetType */
+  GKeyDecompState_GetSize, /* from GetOffset */
+  GKeyDecompState_CopyData, /* from GetSize */
+  GKeyDecompState_GetByte, /* from GetType */
+  GKeyDecompState_PutByte /* from GetByte */
 } GKeyDecompState;
 
 /* This data structure is designed so that zero-initialisation produces a

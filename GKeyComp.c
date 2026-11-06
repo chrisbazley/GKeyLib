@@ -84,17 +84,40 @@ enum
                                              behind, as a base 2 logarithm. */
 };
 
-/* All possible states of a compressor. The initial state must be zero. */
+/* Compressor state transitions (GKeyCompState_ prefix omitted).
+ * Each state is drawn once. Creation and reset enter Progress, which must
+ * be zero. Unchanged states when a call stops are omitted.
+ *
+ *             (start/reset)
+ *                   v
+ *   +--------->[Progress]
+ *   |               |
+ *   |               v
+ *   |        [FindSequence]-----------+---------+---------+
+ *   |               |                 |         |         |
+ *   |               v                 v         |         |
+ *   |          [PutOffset]    +---[PutByte]     |         |
+ *   |               |         |                 |         |
+ *   |               v         |                 |         |
+ *   |           [PutSize]     +--[PutBytes]<----+         |
+ *   |               |         |                           |
+ *   |               v         |                           |
+ *   +--------[NextSequence]<--+    [Flush]<---------------+
+ *
+ * NextSequence -> Progress is switch fall-through, not a state assignment:
+ * if the progress callback aborts there, NextSequence remains the saved
+ * state. Flush never leaves that state, even after returning Finished.
+ */
 typedef enum
 {
-  GKeyCompState_NextSequence = -1,
-  GKeyCompState_Progress,
-  GKeyCompState_FindSequence,
-  GKeyCompState_PutOffset,
-  GKeyCompState_PutSize,
-  GKeyCompState_PutByte,
-  GKeyCompState_PutBytes,
-  GKeyCompState_Flush
+  GKeyCompState_NextSequence = -1, /* from PutSize, PutByte or PutBytes */
+  GKeyCompState_Progress, /* initially, or by fall-through from NextSequence */
+  GKeyCompState_FindSequence, /* from Progress */
+  GKeyCompState_PutOffset, /* from FindSequence */
+  GKeyCompState_PutSize, /* from PutOffset */
+  GKeyCompState_PutByte, /* from FindSequence */
+  GKeyCompState_PutBytes, /* from FindSequence */
+  GKeyCompState_Flush /* from FindSequence; remains here after flushing */
 } GKeyCompState;
 
 struct GKeyComp
