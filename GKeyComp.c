@@ -50,6 +50,7 @@
   CJB: 02-Aug-26: Avoid expression *(out_buffer++) that caused Clang's
                   _Optional analyzer to emit a spurious diagnostic message.
   CJB: 21-Sep-26: Declare variables when they are first assigned.
+  CJB: 28-Nov-26: Remove redundant casts of NULL to function pointer types.
 */
 
 /* ISO library header files */
@@ -648,7 +649,7 @@ GKeyStatus gkeycomp_compress(GKeyComp *comp, GKeyParameters *params)
           /* Copy matching sequence to the write position in the ring
              buffer. */
           copied =
-            RingBuffer_copy(comp->history, (RingBufferWriteFn *)NULL,
+            RingBuffer_copy(comp->history, NULL,
                             (void *)NULL, comp->read_offset, comp->read_size);
           assert(copied <= comp->read_size);
           (void)copied;
